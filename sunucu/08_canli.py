@@ -38,7 +38,7 @@ def _canli_dongu():
                     CANLI.mkdir(parents=True, exist_ok=True)
                     log_dosya = open(CANLI / f"{ad}.log", "a", encoding="utf-8")
                     canli_surecler[ad] = subprocess.Popen([PYTHON, "-u", str(CANLI_SCRIPT), str(yol), str(durum)],
-                                                          stdout=log_dosya, stderr=subprocess.STDOUT, cwd=str(KLASOR))
+                                                          stdout=log_dosya, stderr=subprocess.STDOUT, cwd=str(KLASOR), env=_env())
                     print(f"Canlı yazıya dökme başladı: {ad}", flush=True)
                 # Uzantının parça göndermeden bıraktığı boş kayıtlar (10 dk'dan eski)
                 for eski in KAYIT.glob("*.webm"):

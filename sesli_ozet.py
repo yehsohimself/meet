@@ -8,6 +8,16 @@ from pathlib import Path
 
 KLASOR = Path(__file__).resolve().parent
 SES = "Yelda"
+SESLER = {"tr": "Yelda", "en": "Samantha", "de": "Anna", "fr": "Thomas", "es": "Mónica", "it": "Alice", "nl": "Xander", "pt": "Joana"}   # notların diline göre
+
+
+def _ses():
+    """Notların diliyle aynı macOS sesi (2026-10-29: İngilizce notlar Türkçe sesle okunuyordu)."""
+    try:
+        import claude_yaz
+        return SESLER.get(claude_yaz.yazi_dili_kodu() or "tr", SES)
+    except Exception:  # noqa: BLE001
+        return SES
 
 
 def metin(veri):
@@ -21,7 +31,7 @@ def metin(veri):
     except Exception:  # noqa: BLE001
         isler = []
     if isler:
-        parca.append("Sizin işleriniz: " + "; ".join(i["is"] + (f", {i['ne_zaman']}" if i.get("ne_zaman") else "") for i in isler[:6]) + ".")
+        parca.append(("Your tasks: " if _ses() != SES else "Sizin işleriniz: ") + "; ".join(i["is"] + (f", {i['ne_zaman']}" if i.get("ne_zaman") else "") for i in isler[:6]) + ".")
     return "\n\n".join(parca).replace("·", ",")
 
 
@@ -36,7 +46,10 @@ def uret(temel, veri=None):
     with tempfile.TemporaryDirectory() as t:
         txt, aiff = Path(t) / "o.txt", Path(t) / "o.aiff"
         txt.write_text(m, encoding="utf-8")
-        subprocess.run(["say", "-v", SES, "-r", "185", "-f", str(txt), "-o", str(aiff)], check=True, timeout=300)
+        try:
+            subprocess.run(["say", "-v", _ses(), "-r", "185", "-f", str(txt), "-o", str(aiff)], check=True, timeout=300)
+        except subprocess.CalledProcessError:                    # o dilin sesi kurulu değilse sistemin varsayılan sesi
+            subprocess.run(["say", "-r", "185", "-f", str(txt), "-o", str(aiff)], check=True, timeout=300)
         subprocess.run(["/opt/homebrew/bin/ffmpeg", "-y", "-loglevel", "error", "-i", str(aiff), "-c:a", "aac", "-b:a", "96k", str(hedef)], check=True, timeout=300)
     sn = float(subprocess.run(["/opt/homebrew/bin/ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(hedef)],
                               capture_output=True, text=True).stdout.strip() or 0)

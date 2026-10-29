@@ -14,6 +14,7 @@ import os
 import re
 import shutil
 import subprocess
+import contextlib
 import contextvars
 import tempfile
 import threading
@@ -55,6 +56,35 @@ def model():
 # Misafir (Studio davetlileri, 2026-10-24): misafirin işi yalnızca KENDİ Claude anahtarıyla yapılır; anahtarı yoksa Claude hiç kullanılmaz
 # (çağıran yer bilgisayardaki modele döner). Sitede bağlam değişkeni, alt süreçlerde VH_MISAFIR / VH_MISAFIR_ANAHTAR ortam değişkenleri.
 MISAFIR = contextvars.ContextVar("vh_misafir", default=None)      # {"id": ..., "anahtar": ...}
+# Notların dili (2026-10-29; Meet herkese açık depo: istemler Türkçe yazılmış, İngilizce kullanıcının notları da İngilizce olmalı). ISO kodu; None ya da
+# "tr" = istemin kendi dili, ek yok. Site toplantı akışında ve toplantı sayfası isteklerinde kurar (31_yazi_dili); alt süreçler VH_YAZI_DILI ile alır.
+YAZI_DILI = contextvars.ContextVar("vh_yazi_dili", default=None)
+DIL_ADLARI = {"en": "English", "de": "German", "fr": "French", "es": "Spanish", "it": "Italian", "nl": "Dutch", "pt": "Portuguese", "pl": "Polish",
+              "sv": "Swedish", "da": "Danish", "no": "Norwegian", "fi": "Finnish", "ru": "Russian", "uk": "Ukrainian", "ar": "Arabic", "ja": "Japanese",
+              "zh": "Chinese", "ko": "Korean", "hi": "Hindi", "el": "Greek", "cs": "Czech", "ro": "Romanian", "hu": "Hungarian"}
+
+
+def yazi_dili_kodu():
+    return YAZI_DILI.get() or os.environ.get("VH_YAZI_DILI") or None
+
+
+def dil_eki():
+    """İstemin sonuna eklenecek dil talimatı (Türkçe ya da belirsizse boş)."""
+    d = yazi_dili_kodu()
+    if not d or d == "tr":
+        return ""
+    ad = DIL_ADLARI.get(d, d)
+    return (f"\n\nOUTPUT LANGUAGE: Write every human-readable text you produce (summaries, notes, list items, answers, and text values inside JSON) "
+            f"in {ad}, even though these instructions are in Turkish. Keep JSON keys, field codes and verbatim quotes from the transcript exactly as they are.")
+
+
+@contextlib.contextmanager
+def yazi_dili(kod):
+    t = YAZI_DILI.set(kod or None)
+    try:
+        yield
+    finally:
+        YAZI_DILI.reset(t)
 
 
 def misafir():
@@ -356,6 +386,7 @@ def _oncelik(is_adi):
 def sor(istem, sistem="", zaman_asimi=600, model_adi=None, araclar=""):
     """İstemi Claude'a verir, yanıt metnini döndürür. Varsayılan araç yok; yalnızca metin. `araclar` yalnız web için verilir
     ("WebSearch,WebFetch"; 2026-10-29 Content'in akım araması: anahtarsız arama motorları otomatik sorguyu engelliyor)."""
+    istem = istem + dil_eki()
     p = program()
     if not p:
         raise ClaudeHata("Claude programı bulunamadı")
@@ -396,6 +427,7 @@ def sor(istem, sistem="", zaman_asimi=600, model_adi=None, araclar=""):
 def sor_akis(istem, sistem="", zaman_asimi=300, model_adi=None):
     """Yanıtı yazıldıkça parça parça verir (üreteç). Toplantı sohbetinde ilk kelimeler birkaç saniyede görünsün diye (2026-10-20;
     tam yanıtı beklemek 30-100 sn sürebiliyordu). Claude Code: --output-format stream-json --include-partial-messages."""
+    istem = istem + dil_eki()
     p = program()
     if not p:
         raise ClaudeHata("Claude programı bulunamadı")
@@ -441,6 +473,7 @@ def sor_akis(istem, sistem="", zaman_asimi=300, model_adi=None):
 def sor_gorsel(istem, resimler, sistem="", zaman_asimi=900, model_adi=None):
     """Metin + resimler (jpg/png yolları) ile tek mesaj; yanıt metni. Claude Code'un stream-json girişiyle."""
     import base64
+    istem = istem + dil_eki()
     p = program()
     if not p:
         raise ClaudeHata("Claude programı bulunamadı")

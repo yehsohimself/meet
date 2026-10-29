@@ -179,7 +179,7 @@ def _meet_kayit_dongu():
             CANLI.mkdir(parents=True, exist_ok=True)
             with open(CANLI / f"{ad}.log", "a", encoding="utf-8") as log_dosya:                # alt süreç kendi kopyasını tutar; burada kapanır
                 canli_surecler[ad] = subprocess.Popen([PYTHON, "-u", str(CANLI_SCRIPT), str(MEET_KAYIT_CANLI), str(durum)],
-                                                      stdout=log_dosya, stderr=subprocess.STDOUT, cwd=str(KLASOR))
+                                                      stdout=log_dosya, stderr=subprocess.STDOUT, cwd=str(KLASOR), env=_env())
             dn["son"] = time.time()
             print(f"Canlı yazıya dökme (kayıt sürerken) başladı: {ad}", flush=True)
         except Exception as e:  # noqa: BLE001

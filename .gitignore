@@ -50,9 +50,9 @@ muzik/
 ghost/
 research_notes/
 reports/
-content/
-pt/
-pt_medya/
+/content/
+/pt/
+/pt_medya/
 couple/
 reklam_arsivi/
 misafir/
@@ -67,6 +67,11 @@ NOTLAR_OZEL.md
 .sizinti_ek.txt
 .sizinti_izin.txt
 static/logolar/
+
+# kesilen depoların ekran görüntüleri
+!disa/*/docs/*.jpg
+
+# Chrome uzantısının simgeleri (Meet deposu kesimi bunları ister)
 !uzanti/ikonlar/*.png
 
 # kesilen depo: örnek medya ve ekran görüntüsü depoya girer (monorepo'da *.mp4/*.jpg dışarıdaydı)

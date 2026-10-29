@@ -65,6 +65,11 @@ def _sor(istem, json_bekle=True, num_ctx=16384, zaman_asimi=900):
     if not ollama_hazir():
         raise RuntimeError("Yapay zekâ modeli hazır değil")
     SON_MODEL = MODEL
+    try:
+        import claude_yaz
+        istem = istem + claude_yaz.dil_eki()                 # notların dili (Claude yolunda claude_yaz.sor ekler)
+    except Exception:  # noqa: BLE001
+        pass
     govde = {"model": MODEL, "prompt": istem, "stream": False,
              "options": {"temperature": 0.2, "num_ctx": num_ctx, "num_predict": 2000}}
     if json_bekle:

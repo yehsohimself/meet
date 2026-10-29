@@ -3,6 +3,7 @@
 python disa_depo.py studio <hedef klasör>      Studio + ortak motor → hedef (var olan dosyaların üstüne yazar, fazlalıkları siler)
 python disa_depo.py meet <hedef klasör>        Meet + ortak motor → hedef; ürüne özel dosyalar disa/meet/
 python disa_depo.py pt <hedef klasör>          PT tek başına (pt_sunucu.py) → hedef; ürüne özel dosyalar disa/pt/
+python disa_depo.py content <hedef klasör>     Content tek başına (content_sunucu.py) → hedef; ürüne özel dosyalar disa/content/
 python disa_depo.py pt-medya <zip>             PT'nin görsel ve ses paketi (GitHub sürümüne konur)
 
 Ne kopyalanır: ürünün sunucu parçaları + onların kullandığı modüller (kapanış), statik dosyalar, testler, şablonlar, lisans. Kişisel dosyalar
@@ -106,7 +107,8 @@ def kes(urun, hedef, log=print):
         (hedef / "README.md").write_text(README[urun], encoding="utf-8")
     kopyalanan.add("README.md"); kopyalanan.add("docs/ekran.jpg")
     (hedef / "docs").mkdir(exist_ok=True)
-    (hedef / "docs" / "MIMARI.md").write_text(_mimari(urun), encoding="utf-8"); kopyalanan.add("docs/MIMARI.md")
+    if U.get("mimari", True):                                 # Content'in motoru yok: ortak mimari notu ona uymaz
+        (hedef / "docs" / "MIMARI.md").write_text(_mimari(urun), encoding="utf-8"); kopyalanan.add("docs/MIMARI.md")
     # fazlalıkları sil (yalnız bu betiğin yazdığı türden dosyalar; .git, veri klasörleri dokunulmaz)
     for f in list(hedef.rglob("*")):
         rel = f.relative_to(hedef).as_posix()
@@ -238,6 +240,23 @@ URUNLER["pt"] = {
 }
 
 
+# ----------------------------------------------------------------------------- Content (2026-10-29)
+URUNLER["content"] = {
+    "ad": "Content",
+    "parcalar": [],
+    "moduller": ["content", "content_site", "content_sunucu", "content_yontem", "content_kanit", "content_araclar", "content_dogrulama",
+                 "content_test", "claude_yaz", "goruntu", "sesnot", "ortak", "gizli", "sizinti"],
+    "static": ["content.html", "logo/content.svg"],
+    "dosyalar": ["LICENSE", "pytest.ini"],
+    "sablon": "disa/content",
+    "requirements_cikar": [],
+    "requirements": "yt-dlp[default,curl-cffi]\nflask\nrequests\npillow\nmlx-whisper\nscenedetect==0.7.2\nopencv-python-headless\n"
+                    "pyobjc-framework-Vision\npyobjc-framework-Quartz\npytest\n",
+    "komut": ("", "Content.command"),
+    "mimari": False,
+}
+
+
 # ----------------------------------------------------------------------------- Meet (2026-10-29)
 # Modüller elle sayılmaz: parçaların ve modüllerin içe aktardığı yerel modüllerin kapanışı (_kapanis). Kardeş ürünlerin modülleri (Ghost, Content,
 # Couple, PT, Atölye) alınmaz; Meet kodunda onları çağıran yerler try/except ya da globals() denetimiyle korunur (testler ve açılış denemesi bunu sınar).
@@ -248,7 +267,7 @@ URUNLER["meet"] = {
     "parcalar": ["00_baslangic", "01_yardimcilar", "02_isci", "03_video_isleri", "04_toplanti", "05_asana", "07_cekirdek", "07_meet", "08_canli",
                  "09_cekirdek", "09_meet", "10_sayfalar", "11_ozellik_sayaci", "12_api", "14_haftalik", "16_altyapi_ve_meet", "16_meet",
                  "17_disa_aktarim", "18_indirilenler", "20_meet_gelisim", "22_misafir", "23_misafir_meet", "24_guvenlik", "25_sahip_uzak",
-                 "27_meet_altyazi", "28_meet_devam", "29_meet_saglik", "30_kayit_disi"],
+                 "27_meet_altyazi", "28_meet_devam", "29_meet_saglik", "30_kayit_disi", "31_yazi_dili"],
     "kapanis": ["site", "transkript", "canli", "canli_asistan", "sesnot", "duman_testi", "yeniden_baslat", "sizinti", "disa_depo", "yedek",
                 "geri_yukle", "videohub_mcp", "isimlendir", "takip", "dolgu", "studio_duzelt"],
     "moduller": [],
