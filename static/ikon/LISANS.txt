@@ -1,0 +1,2 @@
+Phosphor Icons (duotone), https://phosphoricons.com — MIT License, Copyright (c) 2023 Phosphor Icons.
+Marka simgeleri (static/logolar) bu dosyalardan sirketler.logolari_uret() ile üretilir.

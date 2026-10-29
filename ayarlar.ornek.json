@@ -1,0 +1,47 @@
+{
+ "_not": "Bu dosya örnek. Kurulum betiği bunu ayarlar.json olarak kopyalar; ayarlar.json git dışıdır ve sitenin Ayarlar penceresinden düzenlenir. Şifre ve anahtarlar burada değil, macOS Anahtar Zinciri'nde tutulur (gizli.py).",
+ "ozet": true,
+ "ozet_dili": "tr",
+ "ag_paylasimi": false,
+ "drive": false,
+ "drive_klasor": "Toplantılar",
+ "oto_kayit": false,
+ "claude": true,
+ "benim_adim": "",
+ "benim_epostalar": [],
+ "musteriler": [],
+ "sozluk": [],
+ "sirketler": [
+  {
+   "kod": "ajans",
+   "ad": "Ajans Adı",
+   "renk": "#141414",
+   "alan": ["ajans.com"],
+   "aciklama": "Birlikte çalıştığınız ajans; toplantılar bu şirketin müşterilerine göre dosyalanır.",
+   "musteriler": ["Marka A", "Marka B"],
+   "kisiler": [],
+   "drive_klasor": "Ajans",
+   "asana": true
+  },
+  {
+   "kod": "kendi",
+   "ad": "Kendi Şirketim",
+   "renk": "#7A5AF8",
+   "alan": [],
+   "aciklama": "Kendi işleriniz, toplulukları ve etkinlikleri.",
+   "musteriler": [],
+   "kisiler": [],
+   "kisisel": true
+  }
+ ],
+ "alt_isler": {},
+ "logo_simgeler": {},
+ "harf_tr": [],
+ "harf_en": [],
+ "asana_ws": "",
+ "secki_klasor_id": "",
+ "secki_havuz_id": "",
+ "reklam_arsivi_tablolar": [],
+ "push_iletisim": "",
+ "misafir_kisi": 5
+}

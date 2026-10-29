@@ -1,0 +1,12 @@
+yt-dlp[default,curl-cffi]
+faster-whisper
+av<15
+sherpa-onnx
+python-docx
+flask
+mlx-whisper
+python-dateutil
+mcp>=2.3
+mlx-embeddings
+segno
+pytest

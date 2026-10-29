@@ -1,0 +1,74 @@
+# --- Video Hub: yalnızca kod ve şablonlar sürüm takibinde; kişisel veri, kayıt ve şifre içeren ayarlar DIŞARIDA ---
+# veri ve çıktılar
+transkript_*
+*.docx
+*.srt
+*.m4a
+*.mp4
+*.webm
+*.jpg
+*.png
+!static/*.png
+indirilenler/
+kayitlar/
+yuklemeler/
+kareler/
+ozetler/
+.cop/
+.yedek/
+.olcum/
+radar/*.docx
+atolye/calismalar/
+atolye/medya/
+atolye/bilgi/
+atolye/.kota.json
+atolye/geri_bildirim.jsonl
+atolye/ornekler.json
+# şifre/kişisel bilgi içeren ayarlar ve durum dosyaları
+ayarlar.json
+sesler.json
+takip.json
+profil/
+.isler.json
+.son_guncelleme
+# ortam, modeller, önbellek, kayıtlar
+.venv/
+.venv-dublaj/
+modeller/
+__pycache__/
+*.pyc
+*.log
+*.log.*
+.DS_Store
+kaydedici/kaydedici
+kaydedici/*.app/
+eski_transkript_tr.txt
+.onbellek/
+atolye/.onbellek/
+atolye/analiz/
+muzik/
+ghost/
+research_notes/
+reports/
+content/
+pt/
+pt_medya/
+couple/
+reklam_arsivi/
+misafir/
+static/derlenmis/
+# kullanıcının markaları, kadroları ve çalışma notları (2026-10-25: depo dışarıya açılabilir olsun; kodda kişisel ad yok)
+markalar/
+atolye/markalar.json
+atolye/kadro.json
+radar/
+CLAUDE.md
+NOTLAR_OZEL.md
+.sizinti_ek.txt
+.sizinti_izin.txt
+static/logolar/
+!uzanti/ikonlar/*.png
+
+# kesilen depo: örnek medya ve ekran görüntüsü depoya girer (monorepo'da *.mp4/*.jpg dışarıdaydı)
+!static/*_ornek/*.mp4
+!docs/ekran.jpg

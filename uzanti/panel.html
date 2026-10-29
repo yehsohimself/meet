@@ -1,0 +1,85 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Meet</title>
+<style>
+:root{--zemin:#f7f7f5;--yuzey:#fff;--yuzey2:#f0f0ed;--murekkep:#1c1c1e;--soluk:#86868b;--cizgi:rgba(0,0,0,.08);--vurgu:#FF5F1F;--kirmizi:#ff3b30;--turuncu:#ff9f0a;--yesil:#30a46c;--mavi:#3b63e6}
+@media (prefers-color-scheme: dark){:root{--zemin:#0e0e11;--yuzey:#18181c;--yuzey2:#222227;--murekkep:#f2f2f4;--soluk:#9a9aa2;--cizgi:rgba(255,255,255,.1);--vurgu:#FF7A45;--mavi:#8aa3ff}}
+*{box-sizing:border-box}
+body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;margin:0;color:var(--murekkep);background:var(--zemin)}
+main{padding:12px 14px 28px}
+button{font:inherit;cursor:pointer}
+/* üst: durum */
+.ust{position:sticky;top:0;z-index:5;background:var(--zemin);padding:12px 14px 10px;border-bottom:1px solid var(--cizgi)}
+.ust .s1{display:flex;align-items:center;gap:8px}
+.logo{width:22px;height:22px;flex:none}
+.ust h1{font-size:15px;margin:0;font-weight:700;letter-spacing:-.01em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac{border:0;background:none;color:var(--vurgu);font-weight:600;font-size:13px;padding:2px 0}
+.durum{display:flex;align-items:center;gap:8px;margin-top:8px;font-weight:600;font-variant-numeric:tabular-nums}
+.durum .n{width:10px;height:10px;border-radius:50%;background:var(--soluk);flex:none}
+.durum.kayit .n{background:var(--kirmizi);animation:p 1.8s infinite}
+.durum.uyari .n{background:var(--turuncu)}
+.durum small{font-weight:400;color:var(--soluk)}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(255,59,48,.5)}70%{box-shadow:0 0 0 7px rgba(255,59,48,0)}100%{box-shadow:0 0 0 0 rgba(255,59,48,0)}}
+.kisiler{margin-top:4px;color:var(--soluk);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* bölümler */
+section{margin-top:16px}
+h2{font-size:12px;font-weight:600;color:var(--soluk);margin:0 0 8px;display:flex;align-items:center;gap:6px}
+h2 .say{background:var(--vurgu);color:#fff;border-radius:999px;padding:0 7px;font-size:11px;line-height:17px}
+.kart{background:var(--yuzey);border-radius:14px;padding:12px 14px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.kart+.kart{margin-top:8px}
+.kart p{margin:0 0 6px}.kart p:last-child{margin-bottom:0}
+.kart ul{margin:4px 0 0;padding-left:18px}.kart li{margin:2px 0}
+.soluk{color:var(--soluk);font-size:13px}
+/* koç kartları */
+.koc{border-left:4px solid var(--vurgu)}.koc.h{border-left-color:var(--mavi)}.koc.o{border-left-color:var(--yesil)}
+.koc .ust2{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--soluk);margin-bottom:4px}
+.koc .yap{font-weight:700;font-size:15px;line-height:1.35;margin-bottom:4px}
+.koc .soyle{font-style:italic;color:var(--murekkep);opacity:.85}
+.koc.yeni{box-shadow:0 0 0 2px var(--vurgu),0 6px 20px rgba(255,95,31,.18)}
+.koc.eski{opacity:.62}
+.geri{display:flex;gap:6px;margin-top:8px}
+.geri button{border:1px solid var(--cizgi);background:none;color:var(--soluk);border-radius:999px;padding:2px 10px;font-size:12px}
+.geri button.sec{background:var(--yuzey2);color:var(--murekkep);border-color:transparent;font-weight:600}
+/* giriş satırları */
+.giris{display:flex;gap:6px;background:var(--yuzey);border-radius:999px;padding:4px 4px 4px 14px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.giris input{flex:1;min-width:0;border:0;background:transparent;color:var(--murekkep);font:inherit;outline:none;padding:6px 0}
+.giris button{border:0;border-radius:999px;background:var(--vurgu);color:#fff;font-weight:600;font-size:13px;padding:7px 13px;white-space:nowrap}
+.giris button.iki{background:var(--yuzey2);color:var(--murekkep)}
+.notlar{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.notlar span{background:var(--yuzey);border-radius:999px;padding:3px 10px;font-size:12.5px}
+.notlar span.isaret{color:var(--vurgu);font-weight:600}
+.notlar b{color:var(--soluk);font-weight:500;margin-right:4px;font-variant-numeric:tabular-nums}
+.amac{display:flex;align-items:center;gap:8px}
+.amac .m{flex:1}
+.amac .m b{display:block;font-size:12px;color:var(--soluk);font-weight:600}
+.amac .duz{border:0;background:none;color:var(--vurgu);font-size:13px;font-weight:600}
+/* konuşulanlar */
+details{margin-top:16px}
+summary{list-style:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--soluk);display:flex;align-items:center;gap:6px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"›";display:inline-block;transition:transform .15s;font-size:15px;line-height:1}
+details[open] summary::before{transform:rotate(90deg)}
+details>.kart{margin-top:8px}
+.akis{max-height:38vh;overflow:auto;font-size:13px}
+.akis div{padding:5px 0;border-bottom:1px solid var(--cizgi)}.akis div:last-child{border:0}
+.akis span{color:var(--soluk);font-variant-numeric:tabular-nums;margin-right:6px}
+.sonuc{font-size:13.5px}
+.sonuc a{color:var(--vurgu)}
+.kaynak{display:inline-block;margin:6px 6px 0 0;font-size:12px;color:var(--vurgu);text-decoration:none}
+.liste a{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--cizgi);color:var(--murekkep);text-decoration:none}
+.liste a:last-child{border:0}.liste a span{color:var(--soluk);font-size:12.5px;white-space:nowrap}
+.cubuk{height:4px;border-radius:2px;background:var(--yuzey2);overflow:hidden;margin-top:8px}.cubuk i{display:block;height:100%;background:var(--vurgu)}
+.birincil{display:inline-block;margin-top:8px;border:0;border-radius:999px;background:var(--vurgu);color:#fff;font-weight:600;font-size:13px;padding:7px 14px;text-decoration:none}
+.uyarikart{border-left:4px solid var(--turuncu)}
+.paycubuk{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--yuzey2)}.paycubuk i{display:block;height:100%}
+.payad{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.payad b{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:0}
+.adimlar{margin:0 0 8px;padding-left:20px}.adimlar li{margin:0 0 8px}
+</style></head><body>
+<div class="ust">
+  <div class="s1"><svg class="logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#FF5F1F"/><g stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M9 14v4M13 10.5v11M17 12.5v7M21 9v14M25 15v2"/></g></svg>
+    <h1 id="baslik">Meet</h1><button class="ac" id="meetAc" type="button" title="Meet'i yeni sekmede açar">Meet’i aç</button></div>
+  <div class="durum" id="durum"><span class="n"></span><span id="durumMetin">Bakılıyor…</span></div>
+  <div class="kisiler" id="kisiler" hidden></div>
+</div>
+<main id="ana"></main>
+<script src="panel.js"></script></body></html>
