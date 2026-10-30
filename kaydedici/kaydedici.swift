@@ -33,6 +33,43 @@ let SITE = "http://127.0.0.1:8765"
 
 func log(_ m: String) { let f = DateFormatter(); f.dateFormat = "HH:mm:ss"; print("[\(f.string(from: Date()))] \(m)"); fflush(stdout) }
 
+// Askıda kalan sistem çağrılarına karşı (2026-10-30): 29 Ekim 20.28'de izleme döngüsünün ilk turunda bir ScreenCaptureKit çağrısı hiç geri
+// dönmedi; süreç "çalışıyor" görünürken döngü 14 saat durdu ve ertesi sabahki toplantı hiç kaydedilmedi. Her çağrı süre sınırlı; ayrıca
+// döngü 90 sn ilerlemezse süreç kendini kapatır (giriş ajanı hemen yeniden açar; süren kaydın parçaları açılışta kurtarılır).
+final class TekSefer<T>: @unchecked Sendable {
+    private let kilit = NSLock(); private var bitti = false; private let c: CheckedContinuation<T?, Never>
+    init(_ c: CheckedContinuation<T?, Never>) { self.c = c }
+    func ver(_ v: T?) { kilit.lock(); defer { kilit.unlock() }; if bitti { return }; bitti = true; c.resume(returning: v) }
+}
+func zamanAsimli<T>(_ sn: Double, _ is_: @escaping () async throws -> T) async -> T? {
+    await withCheckedContinuation { (c: CheckedContinuation<T?, Never>) in
+        let t = TekSefer(c)
+        Task.detached { t.ver(try? await is_()) }
+        DispatchQueue.global().asyncAfter(deadline: .now() + sn) { t.ver(nil) }
+    }
+}
+struct ZamanAsimi: LocalizedError { let ne: String; var errorDescription: String? { "\(ne) yanıt vermedi" } }
+func paylasilan(_ masaustuHaric: Bool, onScreenWindowsOnly: Bool) async throws -> SCShareableContent {
+    guard let ic = await zamanAsimli(8, { try await SCShareableContent.excludingDesktopWindows(masaustuHaric, onScreenWindowsOnly: onScreenWindowsOnly) })
+    else { log("Pencere listesi 8 sn'de gelmedi; atlandı"); throw ZamanAsimi(ne: "Pencere listesi") }
+    return ic
+}
+let nabizKilit = NSLock(); var nabizZamani = Date()
+/// İzleme döngüsü her turda çağırır; uzun işten (kaydı birleştirme) önce `ileri` ile bekçiye süre tanınır.
+func nabizAt(ileri: Double = 0, klasor: URL? = nil) {
+    nabizKilit.lock(); nabizZamani = Date().addingTimeInterval(ileri); nabizKilit.unlock()
+    if let k = klasor { try? String(Int(Date().timeIntervalSince1970)).write(to: k.appendingPathComponent(".kaydedici_nabiz"), atomically: true, encoding: .utf8) }
+}
+var bekci: DispatchSourceTimer?
+func bekciKur() {
+    let t = DispatchSource.makeTimerSource(queue: .global()); t.schedule(deadline: .now() + 30, repeating: 15)
+    t.setEventHandler {
+        nabizKilit.lock(); let gecen = Date().timeIntervalSince(nabizZamani); nabizKilit.unlock()
+        if gecen > 90 { log("İzleme döngüsü \(Int(gecen)) sn'dir ilerlemiyor; kaydedici yeniden açılıyor"); exit(3) }
+    }
+    t.resume(); bekci = t
+}
+
 // ----------------------------------------------------------------------------- mikrofonu kim kullanıyor?
 func mikrofonKullananlar() -> [String] {
     var adr = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyProcessObjectList, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
@@ -96,7 +133,7 @@ final class SesYazici {
     }
 }
 
-final class Cikti: NSObject, SCStreamOutput, SCStreamDelegate {
+final class Cikti: NSObject, SCStreamOutput, SCStreamDelegate, AVCaptureAudioDataOutputSampleBufferDelegate {
     let sistem: SesYazici, mikrofon: SesYazici
     var sonSes = Date()               // son ses parçasının geldiği an (sessizlikte de parça gelir; gelmiyorsa yakalama kopmuştur)
     var durdu = false
@@ -108,6 +145,8 @@ final class Cikti: NSObject, SCStreamOutput, SCStreamDelegate {
     // 2026-10-27: 12.05'te "Failed to find any displays" ile akış durdu, kaydedici fark etmedi; toplantının son 26 dakikası kaydedilmedi.
     // Artık ana döngü bu bayrağı görüp yeni bir parçayla yeniden bağlanıyor; parçalar sonda zamanlarına göre birleştiriliyor.
     func stream(_ stream: SCStream, didStopWithError error: Error) { log("Akış durdu: \(error.localizedDescription)"); durdu = true }
+    /// Yalnız mikrofon yedeği (ekran yokken AVCaptureSession): örnekler aynı yazıcıya
+    func captureOutput(_ output: AVCaptureOutput, didOutput sb: CMSampleBuffer, from connection: AVCaptureConnection) { sonSes = Date(); mikrofon.yaz(sb) }
 }
 
 // ----------------------------------------------------------------------------- ekran kareleri (yalnız toplantı penceresi)
@@ -125,7 +164,7 @@ func toplantiBasligiMi(_ t: String) -> Bool {
 
 /// Kaydedilen toplantının penceresi: tarayıcıda başlığı toplantı olan pencere (başka sekmeye geçilmişse yok), masaüstü uygulamasında en büyük pencere.
 func toplantiPenceresiNesne(_ uygulama: String) async -> SCWindow? {
-    guard let ic = try? await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true) else { return nil }
+    guard let ic = try? await paylasilan(true, onScreenWindowsOnly: true) else { return nil }
     let u = uygulama.lowercased().components(separatedBy: ".helper").first ?? uygulama.lowercased()
     let L = ic.windows.filter { w in
         guard let b = w.owningApplication?.bundleIdentifier.lowercased(), b.hasPrefix(u) || u.hasPrefix(b) else { return false }
@@ -165,7 +204,7 @@ final class EkranKaydi {
         let ayar = SCStreamConfiguration()
         let oran = min(1.0, 1280.0 / max(1.0, Double(w.frame.width)))
         ayar.width = Int(Double(w.frame.width) * oran); ayar.height = Int(Double(w.frame.height) * oran); ayar.showsCursor = false
-        guard let img = try? await SCScreenshotManager.captureImage(contentFilter: SCContentFilter(desktopIndependentWindow: w), configuration: ayar) else { return }
+        guard let img = await zamanAsimli(8, { try await SCScreenshotManager.captureImage(contentFilter: SCContentFilter(desktopIndependentWindow: w), configuration: ayar) }) else { return }
         let im = EkranKaydi.imza(img)
         if let o = son {
             var fark = 0; for i in 0..<im.count { fark += abs(Int(im[i]) - Int(o[i])) }
@@ -191,6 +230,8 @@ final class Kayit {
     var hedef: URL? = nil              // kayıt bitince yazılacak dosya (başta belirlenir; canlı yazıya dökme bu adı kullanır)
     var sonBaglanma = Date.distantPast
     var sorun = ""
+    var yedek: AVCaptureSession?      // ekran yokken yalnız mikrofon (2026-10-30)
+    var yalnizMik = false
     let uygulama: String
     var pencere: String = ""          // toplantı uygulamasının pencere başlığı (Teams/Zoom masaüstü: toplantı adı)
     func pencereBasligi(_ icerik: SCShareableContent) {
@@ -214,13 +255,23 @@ final class Kayit {
 
     /// Akış koptuysa ya da 15 sn'dir ses gelmiyorsa eski parçayı kapatıp yenisini açar (en çok 10 sn'de bir dener).
     func gerekirseYenidenBaglan() async {
+        if yalnizMik {                                                      // ekran geri geldi mi? (30 sn'de bir bakılır)
+            guard Date().timeIntervalSince(sonBaglanma) >= 30 else { return }
+            sonBaglanma = Date()
+            if let ic = try? await paylasilan(false, onScreenWindowsOnly: false), !ic.displays.isEmpty { log("Ekran geri geldi; tam kayda geçiliyor"); await yenidenBaglan() }
+            return
+        }
         guard let c = cikti, c.durdu || Date().timeIntervalSince(c.sonSes) > 15 else { if sorun.hasPrefix("Ses") || sorun.hasPrefix("Kayıt") { sorun = "" }; return }
         sorun = c.durdu ? "Kayıt koptu; yeniden bağlanıyor" : "Ses gelmiyor; yeniden bağlanıyor"
         guard Date().timeIntervalSince(sonBaglanma) >= 10 else { return }
         sonBaglanma = Date()
-        if let s = stream { try? await s.stopCapture() }
-        let g = DispatchGroup(); g.enter(); c.sistem.bitir { g.leave() }; g.enter(); c.mikrofon.bitir { g.leave() }; g.wait()
-        do { try await baslat(); sorun = ""; log("Kayıt yeniden bağlandı (parça \(parcalar.count))") }
+        await yenidenBaglan()
+    }
+    private func yenidenBaglan() async {
+        if let s = stream { _ = await zamanAsimli(6) { try await s.stopCapture() }; stream = nil }
+        if let o = yedek { o.stopRunning(); yedek = nil }
+        if let c = cikti { let g = DispatchGroup(); g.enter(); c.sistem.bitir { g.leave() }; g.enter(); c.mikrofon.bitir { g.leave() }; _ = g.wait(timeout: .now() + 30) }
+        do { try await baslat(); if !yalnizMik { sorun = "" }; log("Kayıt yeniden bağlandı (parça \(parcalar.count)\(yalnizMik ? ", yalnız mikrofon" : ""))") }
         catch { log("Yeniden bağlanılamadı: \(error.localizedDescription)") }
     }
 
@@ -248,13 +299,14 @@ final class Kayit {
     }
 
     private func akisBaslat() async throws {
-        var icerik = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
+        var icerik = try await paylasilan(false, onScreenWindowsOnly: false)
         if icerik.displays.isEmpty {                                        // ekran uykuda: uyandırıp bir kez daha bak
             ekranUyandir(); try? await Task.sleep(nanoseconds: 2_500_000_000)
-            icerik = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
+            icerik = try await paylasilan(false, onScreenWindowsOnly: false)
             if !icerik.displays.isEmpty { log("Ekran uykudaydı; uyandırıldı") }
         }
-        guard let ekran = icerik.displays.first else { throw NSError(domain: "kaydedici", code: 1, userInfo: [NSLocalizedDescriptionKey: "Ekran bulunamadı"]) }
+        guard let ekran = icerik.displays.first else { try mikrofonYedegi(); return }
+        yalnizMik = false
         pencereBasligi(icerik)
         // Yalnızca toplantı uygulamasının sesi: başka sekme/uygulamadaki video karışmaz (Chrome yardımcı süreci → ana uygulama)
         let kok = uygulama.lowercased()
@@ -273,8 +325,25 @@ final class Kayit {
         let q = DispatchQueue(label: "kaydedici.ses")
         try s.addStreamOutput(c, type: .audio, sampleHandlerQueue: q)
         try s.addStreamOutput(c, type: .microphone, sampleHandlerQueue: q)
-        try await s.startCapture()
+        guard (await zamanAsimli(15) { try await s.startCapture(); return true }) == true else { throw ZamanAsimi(ne: "Kaydı başlatma") }
         stream = s; cikti = c
+    }
+
+    /// Ekran yokken (kapak kapalı, uyku, dış ekran koptu; 28 Ekim 22.42'de 16 dakika "Ekran bulunamadı" ile toplantı hiç kaydedilmedi) ScreenCaptureKit
+    /// çalışmaz; toplantı büsbütün kaçmasın diye yalnız mikrofon kaydedilir (2026-10-30). Ekran dönünce gerekirseYenidenBaglan tam kayda geçer.
+    private func mikrofonYedegi() throws {
+        let yok = NSError(domain: "kaydedici", code: 1, userInfo: [NSLocalizedDescriptionKey: "Ekran bulunamadı"])
+        guard let cihaz = AVCaptureDevice.default(for: .audio) else { throw yok }
+        let o = AVCaptureSession(); let g = try AVCaptureDeviceInput(device: cihaz)
+        guard o.canAddInput(g) else { throw yok }
+        o.addInput(g)
+        let c = Cikti(sistem: try SesYazici(url: sistemURL), mikrofon: try SesYazici(url: mikURL))
+        let cikis = AVCaptureAudioDataOutput(); cikis.setSampleBufferDelegate(c, queue: DispatchQueue(label: "kaydedici.mik"))
+        guard o.canAddOutput(cikis) else { throw yok }
+        o.addOutput(cikis); o.startRunning()
+        yedek = o; cikti = c; stream = nil; yalnizMik = true
+        sorun = "Ekran bulunamadı; yalnız mikrofon kaydediliyor"
+        log("Ekran bulunamadı; yalnız mikrofon kaydediliyor (ekran dönünce tam kayda geçilir)")
     }
 
     /// Durdurur, iki parçayı birleştirir; döner: m4a yolu (çok kısaysa nil)
@@ -283,12 +352,13 @@ final class Kayit {
         // Kayıt başında seçilen ad bu arada (telefondan yükleme vb.) alınmışsa yenisi (2026-10-27 incelemesi: -y ile üzerine yazılıyordu)
         let hedef = FileManager.default.fileExists(atPath: hedef0.path) ? dosyaAdi(klasor, baslangic) : hedef0
         ekraniUyanikTut(false)
-        if let ic = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false) { pencereBasligi(ic) }   // toplantı adı sonradan belirmiş olabilir
+        if let ic = try? await paylasilan(false, onScreenWindowsOnly: false) { pencereBasligi(ic) }   // toplantı adı sonradan belirmiş olabilir
         ekran?.calisiyor = false
-        if let s = stream { try? await s.stopCapture() }
+        if let s = stream { _ = await zamanAsimli(6) { try await s.stopCapture() } }
+        if let o = yedek { o.stopRunning(); yedek = nil }
         let sem = DispatchGroup()
         if let c = cikti { sem.enter(); c.sistem.bitir { sem.leave() }; sem.enter(); c.mikrofon.bitir { sem.leave() } }
-        sem.wait()
+        _ = sem.wait(timeout: .now() + 30)
         let sure = Date().timeIntervalSince(baslangic)
         let fm = FileManager.default
         if parcalar.isEmpty { parcalar = [(sistemURL, mikURL, 0)] }
@@ -353,6 +423,13 @@ final class Kayit {
 
 // ----------------------------------------------------------------------------- siteye bildir
 /// Uyuyan ekranı uyandırır (kullanıcı etkinliği bildirir; caffeinate -u). Ekran uykudayken ScreenCaptureKit ekran bulamıyor.
+/// Kayıt başlatılamayınca nedeni siteye (kayitlar/.kayit_hata.json): site size "kayıt başlatılamadı" bildirimi gönderir (2026-10-30).
+func kayitHatasiYaz(_ k: URL, _ hata: String?) {
+    let u = k.appendingPathComponent(".kayit_hata.json")
+    guard let h = hata else { try? FileManager.default.removeItem(at: u); return }
+    if let v = try? JSONSerialization.data(withJSONObject: ["zaman": Date().timeIntervalSince1970, "hata": h]) { try? v.write(to: u) }
+}
+
 func ekranUyandir() {
     let p = Process(); p.executableURL = URL(fileURLWithPath: "/usr/bin/caffeinate"); p.arguments = ["-u", "-t", "3"]
     try? p.run()
@@ -411,7 +488,7 @@ func tarayiciKapisi(_ uygulama: String, _ klasor: URL) async -> String? {
 
 /// Tarayıcının ekrandaki pencere başlıkları (öndeki sekmeler); mikrofonu tutan sekmeyi bulmaya yardım için.
 func tarayiciPencereleri(_ uygulama: String) async -> [String] {
-    guard let ic = try? await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: false) else { return [] }
+    guard let ic = try? await paylasilan(true, onScreenWindowsOnly: false) else { return [] }
     let u = uygulama.lowercased().components(separatedBy: ".helper").first ?? uygulama.lowercased()
     return Array(Set(ic.windows.filter { w in
         guard let b = w.owningApplication?.bundleIdentifier.lowercased(), b.hasPrefix(u) || u.hasPrefix(b), w.frame.width > 300 else { return false }
@@ -423,7 +500,7 @@ func tarayiciPencereleri(_ uygulama: String) async -> [String] {
 /// ekranda toplantı başlıklı tarayıcı penceresi. Döner: (uygulama kimliği, başlık, sekmeden ses geliyor mu (Chrome başlıkta 🔊)) ya da nil.
 let TARAYICILAR = ["com.google.chrome", "com.brave.browser", "com.microsoft.edgemac", "company.thebrowser.browser"]
 func sesliToplantiPenceresi(_ haric: [String] = []) async -> (String, String, Bool)? {
-    guard let ic = try? await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true) else { return nil }
+    guard let ic = try? await paylasilan(true, onScreenWindowsOnly: true) else { return nil }
     var bulunan: (String, String, Bool)? = nil
     for w in ic.windows {
         guard let b = w.owningApplication?.bundleIdentifier, TARAYICILAR.contains(where: { b.lowercased().hasPrefix($0) }), let t = w.title, w.frame.width > 300,
@@ -440,7 +517,7 @@ func kapiYaz(_ m: String) { if m != sonKapi { log(m); sonKapi = m } }
 
 /// Tarayıcının ekrandaki pencerelerinden biri toplantı sayfası mı (Meet/Teams/Zoom/Whereby/Webex başlığı). Döner: başlık ya da nil.
 func toplantiPenceresi(_ uygulama: String) async -> String? {
-    guard let ic = try? await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true) else { return nil }
+    guard let ic = try? await paylasilan(true, onScreenWindowsOnly: true) else { return nil }
     let u = uygulama.lowercased().components(separatedBy: ".helper").first ?? uygulama.lowercased()
     // Yalnızca GÖRÜŞME sayfası başlıkları. 20 Ekim: "(1) IK 18 | Microsoft Teams" (Teams SOHBET sayfası) eşleşti, arka planda futbol yayını
     // toplantı diye kaydedildi. Teams'te ancak toplantı/arama sözcüğü varsa; Meet'te toplantı kodu (abc-defg-hij) ya da "Meet - ".
@@ -481,7 +558,7 @@ func kayitDisiToplanti(_ uygulama: String, _ klasor: URL, _ desenler: [String]) 
     }
     let kd = yas(".kayit_disi_arama")
     if kd < 30 && kd <= yas(".uzanti_arama") { return "Chrome uzantısı bildirdi" }
-    guard let ic = try? await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true) else { return nil }
+    guard let ic = try? await paylasilan(true, onScreenWindowsOnly: true) else { return nil }
     let u = uygulama.lowercased().components(separatedBy: ".helper").first ?? uygulama.lowercased()
     let tarayici = ["chrome", "safari", "firefox", "browser", "edge"].contains(where: { u.contains($0) })
     let basliklar = ic.windows.compactMap { w -> String? in
@@ -597,7 +674,7 @@ if args.count >= 2 && args[1] == "--durum" {
     if let t = toplantiUygulamasi(l) { print("Toplantı uygulaması: \(t)") }
     let bitti = DispatchSemaphore(value: 0)
     Task.detached {
-        if let ic = try? await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true) {
+        if let ic = try? await paylasilan(true, onScreenWindowsOnly: true) {
             let tarayici = ic.windows.filter { ($0.owningApplication?.bundleIdentifier ?? "").lowercased().contains("chrome") && ($0.frame.width > 300) }
             print("Ekrandaki Chrome pencereleri: \(tarayici.count), başlığı okunan: \(tarayici.filter { ($0.title ?? "").count > 0 }.count)")
         } else { print("Pencere listesi alınamadı (Ekran Kaydı izni?)") }
@@ -647,13 +724,14 @@ if args.count >= 4 && args[1] == "--izle" {
             k.parcalar = parcalar; k.pencere = (d["pencere"] as? String) ?? ""
             let hedef = (d["hedef"] as? String).map { URL(fileURLWithPath: $0) } ?? dosyaAdi(kayitKlasoru, k.baslangic)
             log("Yarım kalmış kayıt bulundu (\(parcalar.count) parça); dosyaya çevriliyor")
-            let u = await k.durdur(hedef: hedef, enAzSn: 60)
+            nabizAt(ileri: 1800); let u = await k.durdur(hedef: hedef, enAzSn: 60)
             k.durumYaz(kayit: false)
             if let u = u { log("Yarım kalmış kayıt kurtarıldı: \(u.lastPathComponent)"); siteyeBildir(dosya: u, uygulama: k.uygulama, baslangic: k.baslangic, mik: k.sonMik, pencere: k.pencere) }
         }
     }
     Bildirici.shared.kur()
     Gosterge.shared.kur()
+    nabizAt(klasor: kayitKlasoru); bekciKur()
     var aktif: Kayit? = nil; var aktifUyg = ""; var sonGorulme = Date(); var ilkGorulme: Date? = nil; var aramaUyarildi = false; var sonKapiZamani = Date(); var kayitDisiUyarildi = ""
     var bosMikBas: Date? = nil; var bosMikSimdi = false; var sonMikYazma = Date.distantPast
     var sonPencereBakis = Date.distantPast; var sonSesliToplanti = Date.distantPast; var sesliUyarildi = ""
@@ -671,6 +749,7 @@ if args.count >= 4 && args[1] == "--izle" {
     sinyal.resume()
     Task {
         while true {
+            nabizAt(klasor: kayitKlasoru)
             let ay = ayarOku(ayarYolu)
             let acik = (ay["oto_kayit"] as? Bool) ?? true
             Bildirici.shared.tara(kayitKlasoru)
@@ -736,7 +815,7 @@ if args.count >= 4 && args[1] == "--izle" {
                 if sessiz >= BEKLE_DUR || Date().timeIntervalSince(a.baslangic) >= EN_COK || !acik {
                     log("Toplantı bitti görünüyor (\(aktifUyg)); kayıt kapatılıyor")
                     let hedef = a.hedef ?? dosyaAdi(kayitKlasoru, a.baslangic)
-                    let u = await a.durdur(hedef: hedef, enAzSn: EN_AZ)
+                    nabizAt(ileri: 1800); let u = await a.durdur(hedef: hedef, enAzSn: EN_AZ)
                     a.durumYaz(kayit: false)
                     if let u = u { siteyeBildir(dosya: u, uygulama: aktifUyg, baslangic: a.baslangic, mik: a.sonMik, pencere: a.pencere) }
                     aktif = nil; aktifUyg = ""; ilkGorulme = nil
@@ -747,10 +826,10 @@ if args.count >= 4 && args[1] == "--izle" {
                     let k = Kayit(klasor: kayitKlasoru, uygulama: u)
                     k.hedef = dosyaAdi(kayitKlasoru, k.baslangic)
                     do {
-                        try await k.baslat(); aktif = k; aktifUyg = u; sonGorulme = Date(); log("Kayıt başladı: \(u)"); k.durumYaz(kayit: true)
+                        try await k.baslat(); aktif = k; aktifUyg = u; sonGorulme = Date(); log("Kayıt başladı: \(u)"); k.durumYaz(kayit: true); kayitHatasiYaz(kayitKlasoru, nil)
                         if (ay["ekran_kareleri"] as? Bool) ?? true { let e = EkranKaydi(kok: kayitKlasoru, uygulama: u, baslangic: k.baslangic); k.ekran = e; e.baslat() }
                     }
-                    catch { log("Kayıt başlatılamadı: \(error.localizedDescription) (izinleri kontrol edin)"); ilkGorulme = Date().addingTimeInterval(60) }
+                    catch { log("Kayıt başlatılamadı: \(error.localizedDescription) (izinleri kontrol edin)"); ilkGorulme = Date().addingTimeInterval(30); kayitHatasiYaz(kayitKlasoru, error.localizedDescription) }
                 }
             } else { ilkGorulme = nil }
             Gosterge.shared.guncelle(aktif, kok: kayitKlasoru)

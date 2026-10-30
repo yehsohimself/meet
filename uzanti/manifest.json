@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Meet",
   "description": "Meet for Google Meet, Teams and Zoom on the web: tells the local Meet app when you are in a call, who is there and who is speaking (from captions); side panel with prep notes, live suggestions, notes and summary. Talks only to Meet on this Mac.",
-  "version": "3.22",
+  "version": "3.23",
   "icons": {
     "16": "ikonlar/16.png",
     "32": "ikonlar/32.png",
