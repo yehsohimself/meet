@@ -125,6 +125,11 @@ def uzanti_durum_post():
     baslik = str(v.get("baslik") or "")[:120]
     if v.get("platform") == "meet" and baslik and not re.search(r"^Meet - |- Google Meet$", baslik) and not v.get("toplanti_adi"):
         baslik = ""                                            # Meet sekmesinin başlığı toplantı adı değilse (ör. Gemini paneli) alma
+    # 2026-10-30: uzantı iki gerçek görüşmede "aramada" diyemedi (düğme adları tutmadı) ama katılımcıları okuyordu; başlık Meet'in kendi biçimindeyse
+    # ve en az iki katılımcı görülüyorsa görüşme sayılır (kaydedicinin uzantı kapısı ve hazırlık notu buna dayanır)
+    if not v.get("aktif") and not v.get("bekleme") and v.get("platform") == "meet" and re.search(r"^Meet - |- Google Meet$", baslik) \
+            and len(_katilimci_temizle(v.get("katilimcilar")) or []) >= 2:
+        v["aktif"] = True
     bekleme = bool(v.get("bekleme")) and not v.get("aktif")      # giriş (bekleme) ekranı: yalnız o ekrandaki adlar, eski toplantının adları değil
     uzanti_durum.update({"zaman": time.time(), "platform": str(v.get("platform") or "")[:30], "baslik": baslik, "arama": bool(v.get("aktif")), "bekleme": bekleme,
                          "katilimcilar": _katilimci_temizle(v.get("katilimcilar")) or ([] if bekleme else uzanti_durum.get("katilimcilar", [])), "kayit": str(v.get("kayit") or ""),

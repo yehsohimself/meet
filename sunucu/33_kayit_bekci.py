@@ -131,7 +131,8 @@ def kayit_sagligi():
         pass
     k = meet_kayit_canli()
     if k:
-        v["kayit"] = {"ad": k.get("ad"), "sure": int(simdi - float(k.get("baslangic") or simdi)), "sorun": k.get("sorun") or "", "ses_yas": int(simdi - float(k.get("son_ses") or simdi))}
+        v["kayit"] = {"ad": k.get("ad"), "sure": int(simdi - float(k.get("baslangic") or simdi)), "sorun": k.get("sorun") or "", "ses_yas": int(simdi - float(k.get("son_ses") or simdi)),
+                      "kapaniyor": k.get("kapaniyor")}                       # toplantı sinyali kesildi, kayıt N sn içinde kapanır (kopuk bağlantı payı)
     u = dict(uzanti_durum); u_yas = simdi - float(u.get("zaman") or 0)
     v["uzanti"] = {"surum": u.get("surum"), "aktif": u_yas < 30, "arama": bool(u.get("arama")) and u_yas < 30, "baslik": u.get("baslik") if u_yas < 30 else ""}
     v["sorunlar"] = sorunlar
@@ -143,3 +144,14 @@ def kayit_sagligi():
 @app.get("/api/meet/kayit-saglik")
 def meet_kayit_saglik_get():
     return jsonify(kayit_sagligi())
+
+
+@app.post("/api/kayit/durdur")
+def kayit_durdur_post():
+    """Süren masaüstü kaydını hemen bitir (2026-10-30: toplantı bitince kayıt 45 sn daha sürüyor, kişi 'hâlâ kaydediyor' diye endişeleniyordu).
+    Kaydedici izleme döngüsünde bayrağı görünce kaydı kapatır, dosyayı birleştirir ve notlar başlar."""
+    if not meet_kayit_canli():
+        return jsonify({"tamam": False, "neden": "Süren kayıt yok"}), 409
+    KAYIT.mkdir(exist_ok=True)
+    (KAYIT / ".kayit_durdur").write_text(str(time.time()), encoding="utf-8")
+    return jsonify({"tamam": True})

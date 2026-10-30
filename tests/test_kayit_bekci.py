@@ -103,3 +103,25 @@ def test_kayit_sagligi(site, istemci, monkeypatch):
     v = istemci.get("/api/meet/kayit-saglik").get_json()
     assert v["durum"] == "kayit" and v["kayit"]["sure"] >= 89
     (site.KAYIT / ".kaydedici_izin.json").unlink()
+
+
+def test_kayit_durdur_ve_kapaniyor(site, istemci, monkeypatch):
+    monkeypatch.setattr(site, "meet_kayit_canli", lambda: None)
+    (site.KAYIT / ".kayit_durdur").unlink(missing_ok=True)
+    assert istemci.post("/api/kayit/durdur").status_code == 409 and not (site.KAYIT / ".kayit_durdur").exists()
+    monkeypatch.setattr(site, "meet_kayit_canli", lambda: {"ad": "Toplantı x", "baslangic": time.time() - 30, "son_ses": time.time(), "sorun": "", "kapaniyor": 12})
+    assert istemci.post("/api/kayit/durdur").get_json()["tamam"] and (site.KAYIT / ".kayit_durdur").exists()
+    v = istemci.get("/api/meet/kayit-saglik").get_json()
+    assert v["durum"] == "kayit" and v["kayit"]["kapaniyor"] == 12
+    (site.KAYIT / ".kayit_durdur").unlink()
+
+
+def test_uzanti_katilimcilardan_arama_cikarir(site, istemci):
+    (site.KAYIT / ".uzanti_arama").unlink(missing_ok=True)
+    istemci.post("/api/uzanti/durum", json={"aktif": False, "platform": "meet", "baslik": "Meet - abc-defg-hij", "katilimcilar": ["Ayşe Kaya", "Can Demir"]})
+    assert (site.KAYIT / ".uzanti_arama").exists() and site.uzanti_durum["arama"]
+    (site.KAYIT / ".uzanti_arama").unlink()
+    istemci.post("/api/uzanti/durum", json={"aktif": False, "platform": "meet", "baslik": "Meet - abc-defg-hij", "katilimcilar": ["Ayşe Kaya"], "bekleme": True})
+    assert not (site.KAYIT / ".uzanti_arama").exists()
+    istemci.post("/api/uzanti/durum", json={"aktif": False, "platform": "", "baslik": "", "katilimcilar": []})   # öteki testler temiz başlasın
+    site.uzanti_durum.update(zaman=0, arama=False, bekleme=False, baslik="", katilimcilar=[])

@@ -2013,6 +2013,24 @@
     --glass:rgba(8,8,10,.8); --shadow:none; --shadow2:0 24px 70px rgba(0,0,0,.7); --green:#30d158; --link:#ff7ab8; --tint:rgba(255,61,154,.12); --tint2:rgba(255,61,154,.2)}
   html[data-urun="ghost"]:not([data-theme="light"]) body{background:radial-gradient(1000px 520px at 50% -160px,rgba(255,61,154,.11),transparent 70%),
     radial-gradient(circle at 1px 1px,rgba(255,255,255,.075) 1px,transparent 1.4px) 0 0/22px 22px,var(--bg)!important;background-attachment:fixed!important}
+  /* Danışman (30 Ekim) */
+  .gh-dan-not{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--hair);border-radius:16px;padding:12px 16px;margin:0 0 12px;cursor:pointer;color:var(--ink);font:inherit}
+  .gh-dan-not:hover{border-color:var(--vurgu)}.gh-dan-not b{font-size:14px;white-space:nowrap;max-width:48%;overflow:hidden;text-overflow:ellipsis}.gh-dan-not span{flex:1;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gh-dan-not i{color:var(--muted);font-style:normal}
+  .gh-puan .gh-genel{font-size:14px;color:var(--muted);white-space:nowrap}.gh-puan .gh-genel b{font-size:26px;color:var(--ink);font-weight:700}
+  .gh-puan-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px 22px;margin-top:10px}
+  .gh-puan-ust{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}.gh-puan-ust span{color:var(--muted);font-variant-numeric:tabular-nums}
+  .gh-cubuk{height:6px;border-radius:3px;background:var(--hair2);overflow:hidden}.gh-cubuk i{display:block;height:100%;border-radius:3px;background:var(--vurgu);transition:width .6s}
+  .gh-puan-s.dusuk .gh-cubuk i{background:#FF9500}.gh-puan-s.yok .gh-puan-ust span{font-style:italic}
+  .gh-puan-s small{display:block;font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}.gh-puan-s p{font-size:13px;margin:6px 0 0;line-height:1.45}
+  .gh-aks{background:none;border:0;color:var(--vurgu);font:inherit;font-size:13px;cursor:pointer;padding:0;text-align:left}
+  .gh-dan-m{font-size:15px;line-height:1.55;margin:4px 0 12px}
+  .gh-dan-eks{display:grid;gap:8px;margin:0 0 12px}.gh-dan-eks div{display:grid;gap:3px;padding:10px 12px;border-radius:12px;background:var(--bg);font-size:13.5px}.gh-dan-eks span{color:var(--muted)}.gh-dan-eks em{font-style:normal;color:var(--vurgu)}
+  .gh-hafta{list-style:none;margin:0;padding:0;display:grid}.gh-hafta li{display:grid;grid-template-columns:96px 1fr;gap:2px 12px;font-size:14px;padding:9px 0;border-top:1px solid var(--hair)}.gh-hafta li b{color:var(--muted);font-weight:600}.gh-hafta li>small{grid-column:2;color:var(--muted);font-size:12.5px}.gh-hafta li span small{margin-left:6px;padding:1px 7px;border-radius:8px;background:var(--bg);font-size:11.5px}
+  .gh-gundem{display:grid}.gh-gun-m{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--hair)}.gh-gun-m time{display:grid;gap:2px;font-size:13px;font-weight:600;align-content:start}.gh-gun-m time small{color:var(--muted);font-weight:400}.gh-gun-m p{margin:4px 0 0;font-size:13.5px;color:var(--ink2);line-height:1.45}.gh-gun-h{color:var(--muted)!important}.gh-gun-a{font-size:12px;color:var(--muted)}.gh-gun-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}.gh-gun-b .gh-ok{padding:4px 10px;font-size:12.5px}
+  .gh-gor{display:grid;gap:14px}.gh-gor h3{margin:0;font-size:21px;line-height:1.3}.gh-gor-ust{display:grid;gap:8px}.gh-gor-ilerleme{display:block;height:4px;border-radius:2px;background:var(--hair2);overflow:hidden}.gh-gor-ilerleme i{display:block;height:100%;background:var(--vurgu);transition:width .4s}
+  .gh-gor-s{display:grid;gap:8px}.gh-gor-s button{display:grid;gap:2px;text-align:left;padding:12px 14px;border-radius:14px;border:1px solid var(--hair);background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}.gh-gor-s button:hover{border-color:var(--vurgu)}.gh-gor-s button.secili{border-color:var(--vurgu);box-shadow:0 0 0 1px var(--vurgu) inset}.gh-gor-s button b{font-size:15px}.gh-gor-s button small{color:var(--muted);font-size:12.5px}
+  .gh-gor-t{font:inherit;font-size:15px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box;resize:vertical}.gh-gor-alt{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  @media (max-width:560px){.gh-hafta li,.gh-gun-m{grid-template-columns:1fr}.gh-hafta li>small{grid-column:1}.gh-dan-not b{max-width:100%}.gh-dan-not span{display:none}}
   #gh.gh-kurulumda .gh-nav, #gh.gh-kurulumda .gh-yaz, #gh.gh-kurulumda .gh-yan{display:none}
   #gh.gh-kurulumda .gh-orta{grid-column:1/-1;max-width:680px;margin:0 auto;width:100%}
   .gh-kur{display:grid;gap:16px;padding:22px 22px 20px!important}
@@ -2670,6 +2688,7 @@
         <button type="button" role="tab" data-s="bugun"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Bugün<i></i></button>
         <button type="button" role="tab" data-s="taslak"><svg viewBox="0 0 24 24"><path d="M5 6.5h14M5 12h14M5 17.5h9"/></svg>Taslaklar<i></i></button>
         <button type="button" role="tab" data-s="defter"><svg viewBox="0 0 24 24"><path d="M6 3.5h10.5a2.5 2.5 0 0 1 2.5 2.5v14.5H8.5A2.5 2.5 0 0 1 6 18z"/><path d="M6 18a2.5 2.5 0 0 1 2.5-2.5H19M10 8h5"/></svg>Fikirler<i></i></button>
+        <button type="button" role="tab" data-s="danisman"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15 9-2 5-4 1 2-5z"/></svg>Danışman<i></i></button>
         <button type="button" role="tab" data-s="ses"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg>Profil<i></i></button>
       </div>
       <div class="gh-harita" id="ghHarita" aria-label="Ghost’un beslendiği yerler"></div>
@@ -3414,7 +3433,8 @@ async function toplantiDurum(){
   { const sat = $('#tDurumSat'); if (sat){ const p = [];
       // 2026-10-30: "kayıt kendiliğinden başlar" cümlesi kaydedici takılıyken bile yazıyordu. Artık gerçek durum: kaydedici nabzı, izinler, süren kayıt.
       if (ks && ks.durum === 'kayit'){ const sn = ks.kayit.sure, sure_ = sn >= 3600 ? `${Math.floor(sn / 3600)}:${String(Math.floor(sn / 60) % 60).padStart(2, '0')}:${String(sn % 60).padStart(2, '0')}` : `${Math.floor(sn / 60)}:${String(sn % 60).padStart(2, '0')}`;
-        p.push(`<span class="khp rec" title="${esc(ks.kayit.sorun || 'Ses geliyor; toplantı bitince notlar hazırlanır')}"><i></i>${ks.kayit.sorun ? esc(ks.kayit.sorun) : 'Kaydediliyor'} · ${sure_}${u && u.baslik ? ' · ' + esc(u.baslik) : ''}</span>`); }
+        if (ks.kayit.kapaniyor != null) p.push(`<span class="khp hata" title="Toplantı sinyali kesildi; bağlantı kopup gelebilir diye kısa bir süre beklenir, sonra kayıt kapanır ve notlar hazırlanır"><i></i>Toplantı bitti · kayıt ${ks.kayit.kapaniyor} sn içinde kapanır</span> · <button class="textbtn" type="button" data-ac="durdur">Şimdi bitir</button>`);
+        else p.push(`<span class="khp rec" title="${esc(ks.kayit.sorun || 'Ses geliyor; toplantı bitince notlar hazırlanır')}"><i></i>${ks.kayit.sorun ? esc(ks.kayit.sorun) : 'Kaydediliyor'} · ${sure_}${u && u.baslik ? ' · ' + esc(u.baslik) : ''}</span> · <button class="textbtn" type="button" data-ac="durdur-onay">Kaydı bitir</button>`); }
       else if (ks && ks.durum === 'sorun'){ const s0 = ks.sorunlar[0];
         p.push(`<span class="khp hata" title="${esc(s0.cozum || '')}"><i></i>Kayıt hazır değil: ${esc(s0.metin)}</span>${s0.kod === 'oto_kayit' ? ' · <button class="textbtn" type="button" data-ac="ayar">Aç</button>' : s0.cozum ? ' · <button class="textbtn" type="button" data-ac="cozum" data-m="' + esc(s0.cozum) + '">Nasıl düzelir?</button>' : ''}`); }
       else if (ks) p.push(`<span class="khp ok" title="Kaydedici ${ks.kontrol != null ? ks.kontrol + ' sn önce' : 'az önce'} kontrol edildi; izinler tamam. Zoom, Teams, Google Meet ya da FaceTime’da görüşme başlayınca kayıt kendiliğinden başlar."><i></i>Hazır · toplantıya girdiğinizde kayıt başlar</span>`);
@@ -3431,7 +3451,10 @@ async function toplantiDurum(){
       if (bozuk.length) p.push(`<button class="textbtn uyar" type="button" data-ac="ayar" title="Bu takvimdeki toplantıların adı, katılımcıları ve hazırlık notu gelmez">Bir takvim adresi çalışmıyor</button>`);
       else if (tk && !tk.bagli) p.push(`<button class="textbtn" type="button" data-ac="ayar">Takviminizi ekleyin</button>`);
       sat.innerHTML = p.join(' · '); sat.querySelectorAll('[data-ac="ayar"]').forEach(x => x.addEventListener('click', () => $('#ayarBtn').click()));
-      sat.querySelectorAll('[data-ac="cozum"]').forEach(x => x.addEventListener('click', () => sheet('Nasıl düzelir?', x.dataset.m, 'Tamam', () => {}, false))); } }
+      sat.querySelectorAll('[data-ac="cozum"]').forEach(x => x.addEventListener('click', () => sheet('Nasıl düzelir?', x.dataset.m, 'Tamam', () => {}, false)));
+      const durdur = async () => { try{ const r = await fetch('/api/kayit/durdur', {method:'POST'}); toast(r.ok ? 'Kayıt bitiriliyor; notlar birkaç dakikada hazır olur' : 'Süren kayıt yok'); }catch(e){ toast('Bitirilemedi'); } setTimeout(toplantiDurum, 4000); };
+      sat.querySelectorAll('[data-ac="durdur"]').forEach(x => x.addEventListener('click', durdur));
+      sat.querySelectorAll('[data-ac="durdur-onay"]').forEach(x => x.addEventListener('click', () => sheet('Kaydı bitir', 'Toplantı sürüyorsa gerisi kaydedilmez. Kayıt kapanır ve notlar hazırlanır.', 'Bitir', durdur))); } }
   $('#tdurum').innerHTML = `
     <div class="card"><b><span class="on ${d && d.oto_kayit ? (kayitta ? 'rec' : 'ok') : ''}"></span>${kayitta ? 'Şu an kaydediliyor' : d && d.oto_kayit ? 'Otomatik kayıt açık' : 'Otomatik kayıt kapalı'}</b><small>${kayitta ? esc(u.baslik || u.platform || '') : 'Zoom, Teams, Meet ya da FaceTime mikrofonu açınca kayıt kendiliğinden başlar.'}</small></div>
     <div class="card"><b><span class="on ${u && u.aktif ? 'ok' : ''}"></span>Chrome uzantısı</b><small>${u && u.aktif ? 'Toplantı sekmesi açık' + (u.katilimcilar?.length ? ' · ' + u.katilimcilar.slice(0,4).map(esc).join(', ') : '') : 'Google Meet ya da Teams sekmesi açıkken katılımcı adlarını ve kimin konuştuğunu alır.'}</small></div>
@@ -4530,10 +4553,10 @@ function ghCiz(zorla){
   const kalan = T.filter(x => x.plan_gun === 'Bugün' && (x.platform || 'x') === 'x').length;
   const aday = (GH.f?.adaylar || []).length;
   $$('#ghSek button').forEach(b => { const s = b.dataset.s; b.setAttribute('aria-selected', s === GH.sekme);
-    b.querySelector('i').textContent = s === 'bugun' ? (kalan || '') : s === 'taslak' ? (T.length || '') : s === 'defter' ? (aday || '') : '';
-    b.title = s === 'bugun' ? (kalan ? `Bugün için ${kalan} öneri` : '') : s === 'taslak' ? `${T.length} taslak` : s === 'defter' ? (aday ? `${aday} yeni görüş onayınızı bekliyor` : 'Notlarınız, görüşleriniz, yazı konuları') : s === 'ses' ? 'Tarzınız, Ghost’un öğrendikleri, kaynaklar' : ''; });
+    b.querySelector('i').textContent = s === 'bugun' ? (kalan || '') : s === 'taslak' ? (T.length || '') : s === 'defter' ? (aday || '') : s === 'danisman' ? (GH.dan?.gorusme_gerekli && !GH.dan?.strateji?.cevaplar ? '!' : ((GH.dan?.yaklasan || []).length || '')) : '';
+    b.title = s === 'bugun' ? (kalan ? `Bugün için ${kalan} öneri` : '') : s === 'taslak' ? `${T.length} taslak` : s === 'defter' ? (aday ? `${aday} yeni görüş onayınızı bekliyor` : 'Notlarınız, görüşleriniz, yazı konuları') : s === 'ses' ? 'Tarzınız, Ghost’un öğrendikleri, kaynaklar' : s === 'danisman' ? 'Hesabınızın durumu, bu haftanın planı, yaklaşan gündem' : ''; });
   GH.kartlar = [];
-  $('#ghSayfa').innerHTML = ({bugun: ghBugun, taslak: ghTaslak, blog: ghBlog, defter: ghDefter, ses: ghSes}[GH.sekme] || ghBugun)();
+  $('#ghSayfa').innerHTML = ({bugun: ghBugun, taslak: ghTaslak, blog: ghBlog, defter: ghDefter, ses: ghSes, danisman: ghDanisman}[GH.sekme] || ghBugun)();
   $('#ghYan').innerHTML = ghSizden() + ghStoryKutu();
   $('#ghHarita').innerHTML = ghHarita();
   $$('#gh .gh-oge.acik .gh-metin').forEach(ghBoy);
@@ -4743,6 +4766,7 @@ function ghGecmisGun(){
   return h;
 }
 function ghBugun(){
+  ghYukle('dan', '/api/ghost/danisman');
   if (!GH.d) return GH_ALINAMADI;
   if (GH.gun) return ghGecmisGun();
   // v6 (24 Ekim, "tüm yeniliklerden sonra elden geçir"): Bugün bölümlere ayrıldı: sıradaki gönderi · kısa sıra · haftanın hikâyesi · yanıtlar · LinkedIn
@@ -4761,6 +4785,7 @@ function ghBugun(){
   let h = `<header class="gh-bas"><div><h2>Bugün.${alt ? ` <span>${alt}</span>` : ''}</h2>${not ? `<p>${not}</p>` : ''}</div>
     <div class="gh-bas-sag">${ghElListe().length > 1 ? `<button class="ghb iki kucuk" type="button" data-g="elden" title="Önerilere tek tek bakın; beğendiğinizi tutun, beğenmediğinizi nedeniyle kaldırın. Ghost her kararınızdan öğrenir">Hızlı gözden geçir</button>` : ''}<button class="ghb iki kucuk ikon" type="button" data-g="bugunmenu" aria-haspopup="menu" title="Yeni öneri, önceki günler" aria-label="Diğer"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg></button><input type="date" class="gh-takvim" id="ghTakvim" value="${bugunG}" min="${ghGunEkle(bugunG, -30)}" max="${bugunG}" tabindex="-1" aria-hidden="true"></div></header>`;
   h += ghTempoNot();
+  h += ghDanismanNot();
   h += ghSonucKutu();
   h += ghToplanti();
   if (GH.k?.calisiyor) h += `<div class="gh-haz"><i class="spin"></i><span><b>Yeni öneriler araştırılıyor</b> · ${esc(GH.k.adim || 'kaynaklar okunuyor')}</span></div>`;
@@ -5039,6 +5064,61 @@ function ghBlogKart(o){
 }
 
 /* ---- Sesiniz ---- */
+/* ---- Danışman (ghost_danisman.py, 30 Ekim): uzman görüşmesi, puan kartı, haftalık not, yaklaşan gündem ---- */
+const ghGunSoz = t => { const g = Math.round((new Date(t + 'T12:00') - new Date(new Date().toLocaleDateString('sv') + 'T12:00')) / 864e5); return g <= 0 ? 'Bugün' : g === 1 ? 'Yarın' : `${g} gün sonra`; };
+function ghDanismanNot(){
+  const d = GH.dan; if (!d || d.hata === true || GH.sekme === 'danisman') return '';
+  const git = (b, sp) => `<button class="gh-dan-not" type="button" data-g="sekme" data-s="danisman"><b>${b}</b><span>${sp}</span><i>→</i></button>`;
+  if (d.gorusme_gerekli && !d.strateji?.cevaplar) return git('Danışmanınız sizi tanımak istiyor.', '8 kısa soru, iki dakika; öneriler buna göre seçilir.');
+  const y = (d.yaklasan || []).find(m => !m.hazirlandi);
+  if (y) return git(`${esc(ghGunSoz(y.tarih))}: ${esc(y.ad)}`, esc(y.hazirlik || y.neden || ''));
+  const e = (d.rapor?.eksikler || [])[0];
+  if (e) return git(`Danışman: ${esc(e.baslik)}`, esc(e.aksiyon || e.neden || ''));
+  return '';
+}
+function ghDanisman(){
+  ghYukle('dan', '/api/ghost/danisman');
+  const d = GH.dan;
+  let h = `<header class="gh-bas"><div><h2>Danışman</h2><p>Hesabınızın durumu, bu haftanın planı ve yaklaşan gündem.</p></div>
+    <div class="gh-bas-sag">${d && d.strateji?.cevaplar && !GH.danG ? `<button class="ghb iki kucuk" type="button" data-g="danyenile" ${d.calisiyor ? 'disabled' : ''}>${d.calisiyor ? 'Hazırlanıyor…' : 'Yeniden değerlendir'}</button>` : ''}</div></header>`;
+  if (!d) return h + '<p class="gh-ipucu">Yükleniyor…</p>';
+  if (d.hata === true) return h + GH_ALINAMADI;
+  if (d.calisiyor && !GH._danYokla){ GH._danYokla = true; setTimeout(() => { GH._danYokla = false; GH.dan = undefined; if (GH.sekme === 'danisman') ghCiz(true); }, 8000); }
+  if ((d.gorusme_gerekli && !d.strateji?.cevaplar) || GH.danG) return h + ghGorusme(d);
+  if (d.gorusme_gerekli) h += `<button class="gh-dan-not" type="button" data-g="dangorusme"><b>Üç ay geçti.</b><span>Soruları yeniden cevaplayın; hedefiniz değişmişse öneriler de değişir.</span><i>→</i></button>`;
+  const P = d.puan || {}, B = P.boyutlar || [];
+  h += `<section class="gh-sayfa-kart gh-puan"><header><div><b>Hesabınızın durumu</b><small>Son ${P.gun || 28} gün · ${P.gonderi || 0} gönderi okundu, Ghost’tan ${P.paylasilan || 0} paylaşım${P.yeterli ? '' : ' · veri henüz az'}</small></div>${P.genel != null ? `<span class="gh-genel"><b>${String(P.genel).replace('.', ',')}</b>/10</span>` : ''}</header>
+    <div class="gh-puan-l">${B.map(b => `<div class="gh-puan-s ${b.puan == null ? 'yok' : b.puan < 5 ? 'dusuk' : ''}"><div class="gh-puan-ust"><b>${esc(b.ad)}</b><span>${b.puan == null ? 'veri yetersiz' : String(b.puan).replace('.', ',')}</span></div><div class="gh-cubuk"><i style="width:${b.puan == null ? 0 : b.puan * 10}%"></i></div><small>${esc(b.veri || '')}</small>${b.eksik ? `<p>${esc(b.eksik)}${b.aksiyon?.ad ? ` <button type="button" class="gh-aks" data-g="${esc(b.aksiyon.g || 'sekme')}" data-s="${esc(b.aksiyon.s || 'bugun')}">${esc(b.aksiyon.ad)} →</button>` : ''}</p>` : ''}</div>`).join('')}</div></section>`;
+  const r = d.rapor || {};
+  h += `<section class="gh-sayfa-kart"><header><div><b>Bu hafta</b><small>${r.zaman ? `Danışman notu · ${esc(ghTarih(r.zaman, true))}` : 'Henüz not yok'}</small></div></header>`;
+  if (!r.not) h += d.calisiyor ? `<div class="gh-haz"><i class="spin"></i><span>Danışman notu yazılıyor…</span></div>` : `<p class="gh-ipucu">Pazartesi sabahları kendiliğinden yazılır. <button type="button" class="ghb kucuk" data-g="danyenile">Şimdi yaz</button></p>`;
+  else { h += `<p class="gh-dan-m">${esc(r.not)}</p>`;
+    if ((r.eksikler || []).length) h += `<div class="gh-dan-eks">${r.eksikler.map(e => `<div><b>${esc(e.baslik)}</b><span>${esc(e.neden)}</span><em>${esc(e.aksiyon)}</em></div>`).join('')}</div>`;
+    if ((r.hafta || []).length) h += `<ol class="gh-hafta">${r.hafta.map(x => `<li><b>${esc(x.gun)}</b><span>${esc(x.ne)}${x.mecra ? ` <small>${esc(x.mecra)}</small>` : ''}</span><small>${esc(x.neden)}</small></li>`).join('')}</ol>`;
+    if (r.kacin) h += `<p class="gh-ipucu" style="margin-top:10px">Bu hafta yapmayın: ${esc(r.kacin)}</p>`; }
+  h += '</section>';
+  const G = (d.gundem || []).filter(m => !m.gizli);
+  h += `<section class="gh-sayfa-kart"><header><div><b>Yaklaşan gündem</b><small>Konularınızda önümüzdeki üç haftanın tarihli olayları${d.gundem_zaman ? ` · ${esc(ghTarih(d.gundem_zaman, true))}` : ''}</small></div></header>`;
+  h += G.length ? `<div class="gh-gundem">${G.map(m => `<div class="gh-gun-m"><time>${esc(ghGunSoz(m.tarih))}<small>${esc(new Date(m.tarih + 'T12:00').toLocaleDateString(window.DIL?.locale || 'tr-TR', {day: 'numeric', month: 'short'}))}</small></time><div><b>${esc(m.ad)}</b>${m.alan_ad ? ` <span class="gh-gun-a">${esc(m.alan_ad)}</span>` : ''}<p>${esc(m.neden || '')}</p>${m.hazirlik ? `<p class="gh-gun-h">${esc(m.hazirlik)}</p>` : ''}<div class="gh-gun-b">${m.hazirlandi ? `<span class="gh-ok">${GH_SVG.tik}Taslak hazırlandı</span>` : `<button class="ghb iki kucuk" type="button" data-g="gundemyaz" data-id="${esc(m.id)}">Hazırlan</button>`}${m.kaynak ? `<a class="ghb kucuk" href="${esc(m.kaynak)}" target="_blank" rel="noopener">Kaynak ↗</a>` : ''}<button class="ghb kucuk" type="button" data-g="gundemgizle" data-id="${esc(m.id)}">Gizle</button></div></div></div>`).join('')}</div>`
+    : `<p class="gh-ipucu">${d.calisiyor ? 'Web’de aranıyor…' : 'Henüz bulunmadı. “Yeniden değerlendir” konularınızdaki tarihli olayları web’de arar.'}</p>`;
+  h += '</section>';
+  h += `<p class="gh-ipucu" style="margin:4px 6px 14px">Hedefiniz değiştiyse <button type="button" class="ghb kucuk" data-g="dangorusme">soruları yeniden cevaplayın</button>.</p>`;
+  return h;
+}
+function ghGorusme(d){
+  const Q = d.sorular || [], g = GH.danG || (GH.danG = {i: 0, c: {...(d.strateji?.cevaplar || {})}, konum: d.strateji?.konum || '', notlar: d.strateji?.notlar || ''});
+  if (g.i >= Q.length) return `<section class="gh-sayfa-kart gh-gor"><div class="gh-gor-ust"><span class="gh-etk">Son adım</span><span class="gh-gor-ilerleme"><i style="width:100%"></i></span></div>
+      <h3>Sizi tek cümleyle nasıl tanıtırdınız?</h3><p class="gh-ipucu">İsteğe bağlı. Ghost bu cümleyi her konu seçiminde göz önünde tutar.</p>
+      <textarea class="gh-gor-t" rows="2" data-gor="konum" placeholder="Örn. Reklamcı; futbola ve teknolojiye aynı gözle bakar">${esc(g.konum)}</textarea>
+      <textarea class="gh-gor-t" rows="2" data-gor="notlar" placeholder="Danışmanın bilmesi gereken başka bir şey var mı?">${esc(g.notlar)}</textarea>
+      <div class="gh-gor-alt"><button class="ghb kucuk" type="button" data-g="dangeri">Geri</button><button class="ghb ana" type="button" data-g="dankaydet">Danışmanı başlat</button></div></section>`;
+  const q = Q[g.i];
+  return `<section class="gh-sayfa-kart gh-gor"><div class="gh-gor-ust"><span class="gh-etk">${esc(q.uzman)} soruyor · ${g.i + 1}/${Q.length}</span><span class="gh-gor-ilerleme"><i style="width:${Math.round(100 * g.i / Q.length)}%"></i></span></div>
+    <h3>${esc(q.soru)}</h3>
+    <div class="gh-gor-s">${q.secenekler.map(o => `<button type="button" class="${g.c[q.id] === o.k ? 'secili' : ''}" data-g="dansec" data-q="${esc(q.id)}" data-k="${esc(o.k)}"><b>${esc(o.ad)}</b>${o.not ? `<small>${esc(o.not)}</small>` : ''}</button>`).join('')}</div>
+    <div class="gh-gor-alt">${g.i ? `<button class="ghb kucuk" type="button" data-g="dangeri">Geri</button>` : `<button class="ghb kucuk" type="button" data-g="daniptal">${d.strateji?.cevaplar ? 'Vazgeç' : 'Sonra'}</button>`}<span class="gh-ipucu">${g.i ? '' : 'Cevaplar yalnız bu bilgisayarda kalır.'}</span></div></section>`;
+}
+function ghGorOku(){ const g = GH.danG; if (!g) return; $$('#ghSayfa [data-gor]').forEach(t => { g[t.dataset.gor] = t.value.trim(); }); }
 function ghSes(){
   ghYukle('perf', '/api/x/performans'); ghYukle('terc', '/api/ghost/tercihler');
   const oz = (GH.d || {}).ozet || {}, ps = oz.persona || {}, k = oz.kalite || {}, p = GH.perf, t = GH.terc, kk = GH.k || {}, sg = kk.saglik || {};
@@ -5292,6 +5372,18 @@ async function ghSayfaEylem(g, b){
   const st = () => ghStoryler().find(o => o.id === b.closest('[data-st]')?.dataset.st);
   switch (g){
     case 'sekme': return ghSekme(b.dataset.s);
+    case 'dansec': { const g = GH.danG || (GH.danG = {i: 0, c: {}, konum: '', notlar: ''}); g.c[b.dataset.q] = b.dataset.k; g.i++; return ghCiz(true); }
+    case 'dangeri': { if (GH.danG){ ghGorOku(); GH.danG.i = Math.max(0, GH.danG.i - 1); } return ghCiz(true); }
+    case 'daniptal': GH.danG = null; return ghSekme('bugun');
+    case 'dangorusme': GH.danG = {i: 0, c: {...(GH.dan?.strateji?.cevaplar || {})}, konum: GH.dan?.strateji?.konum || '', notlar: GH.dan?.strateji?.notlar || ''}; return ghCiz(true);
+    case 'dankaydet': { ghGorOku(); b.disabled = true; const g = GH.danG;
+      const r = await fetch('/api/ghost/danisman/gorusme', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({cevaplar: g.c, konum: g.konum, notlar: g.notlar})}).then(r => r.json()).catch(() => ({hata: 'Site yanıt vermedi'}));
+      if (r.hata){ toast(r.hata); b.disabled = false; return; } GH.danG = null; GH.dan = undefined; toast('Danışman sizi tanıdı; not ve gündem hazırlanıyor'); return ghCiz(true); }
+    case 'danyenile': { b.disabled = true; const r = await fetch('/api/ghost/danisman/yenile', {method: 'POST'}).then(r => r.json()).catch(() => ({hata: 'Site yanıt vermedi'}));
+      if (r.hata){ toast(r.hata); b.disabled = false; return; } GH.dan = undefined; toast('Danışman çalışıyor; birkaç dakika sürer'); return ghCiz(true); }
+    case 'gundemyaz': { b.disabled = true; const r = await fetch(`/api/ghost/danisman/gundem/${encodeURIComponent(b.dataset.id)}`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({hazirlan: true})}).then(r => r.json()).catch(() => ({hata: 'Site yanıt vermedi'}));
+      if (r.hata){ toast(r.hata); b.disabled = false; return; } GH.dan = undefined; toast('Taslak yazılıyor; Bugün’de görünecek'); paylasimlarCiz(); return ghCiz(true); }
+    case 'gundemgizle': { b.disabled = true; await fetch(`/api/ghost/danisman/gundem/${encodeURIComponent(b.dataset.id)}`, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({gizli: true})}).catch(() => null); GH.dan = undefined; return ghCiz(true); }
     case 'ghon': GH.on = b.dataset.k; return ghCiz();
     case 'gungit': { const bugun = new Date().toLocaleDateString('sv'), y = ghGunEkle(GH.gun || bugun, +b.dataset.n); GH.gun = y >= bugun ? null : y; GH.acik = {}; return ghCiz(); }
     case 'gunbugun': GH.gun = null; return ghCiz();

@@ -26,18 +26,23 @@
   // olduğu için "(1) IK 18 | Microsoft Teams" sohbeti arama sanıldı ve YouTube/maç sesi toplantı diye kaydedildi.
   const gorunur = el => !!el && (el.offsetWidth > 0 || el.offsetHeight > 0);
   const bul = q => [...document.querySelectorAll(q)].some(gorunur);
+  let aramaIsaret = '';
+  const meetKodu = () => /^\/[a-z]{3}-[a-z]{4}-[a-z]{3}/.test(location.pathname);
   function aramadaMi(){
+    aramaIsaret = '';
     if (platform === 'meet'){
-      if (!/^\/[a-z]{3}-[a-z]{4}-[a-z]{3}/.test(location.pathname)) return false;
-      if (bul('button[aria-label="Leave call" i], button[aria-label^="Leave call" i], button[aria-label*="görüşmeden ayrıl" i], button[aria-label*="aramadan ayrıl" i], button[aria-label*="toplantıdan ayrıl" i], button[aria-label*="anruf verlassen" i], [jsname="CQylAd"]')) return true;
+      if (!meetKodu()) return false;
+      aramaIsaret = 'ayril'; if (bul('button[aria-label="Leave call" i], button[aria-label^="Leave call" i], button[aria-label*="görüşmeden ayrıl" i], button[aria-label*="aramadan ayrıl" i], button[aria-label*="toplantıdan ayrıl" i], button[aria-label*="anruf verlassen" i], [jsname="CQylAd"]')) return true;
       // 3.17 (2026-10-27): 26 Ekim'den beri hiçbir toplantıda "aramada" denmedi (düğme adı değişmiş olabilir); yedek işaretler: kırmızı kapatma
       // düğmesinin simgesi ve görüşmedeki kişi kutucukları (bekleme odasında yok; aynı gün katılımcılar bunlardan okundu)
-      if ([...document.querySelectorAll('button i, button span')].some(x => x.textContent.trim() === 'call_end' && gorunur(x))) return true;
-      if ([...document.querySelectorAll('[data-participant-id]')].some(gorunur)) return true;
+      aramaIsaret = 'call_end'; if ([...document.querySelectorAll('button i, button span')].some(x => x.textContent.trim() === 'call_end' && gorunur(x))) return true;
+      aramaIsaret = 'karo'; if ([...document.querySelectorAll('[data-participant-id]')].some(gorunur)) return true;
       // 3.23 (2026-10-30): bir Meet görüşmesinde yukarıdakilerin hiçbiri tutmadı (2 katılımcı görüldü, "aramada" hiç denmedi), kayıt gecikti.
       // Son çare: toplantı kodu var, giriş ekranı (Katıl düğmesi) yok ve görüşme denetimleri (kendi karo adı, toplantı adı, mikrofon düğmesi) ekranda.
-      if (beklemedeMi()) return false;
-      return !!document.querySelector('[data-self-name], [data-meeting-title]') || bul('[data-is-muted], button[aria-label*="microphone" i], button[aria-label*="mikrofon" i]');
+      if (beklemedeMi()){ aramaIsaret = ''; return false; }
+      aramaIsaret = 'denetim';
+      if (!!document.querySelector('[data-self-name], [data-meeting-title]') || bul('[data-is-muted], button[aria-label*="microphone" i], button[aria-label*="mikrofon" i]')) return true;
+      aramaIsaret = ''; return false;
     }
     if (platform === 'teams'){
       const kapat = bul('#hangup-button, [data-tid="hangup-main-btn"], [data-tid="hangup-button"], [data-tid="call-hangup"], button[aria-label^="Leave (" i], button[aria-label^="Ayrıl (" i], button[aria-label^="Hang up" i], button[aria-label^="Kapat (" i]');
@@ -328,7 +333,18 @@
   let aramaBas = 0;
   function tani(simdiArama, kat){
     const altyazi = platform === 'teams' ? !!teamsAltyaziKutusu() : platform === 'meet' ? !!document.querySelector('[role="region"][aria-label="Captions"], [role="region"][aria-label="Altyazılar"]') : null;
-    return {aramada: simdiArama, sure: simdiArama && aramaBas ? Math.round((Date.now() - aramaBas) / 1000) : 0, altyazi, son_konusan: sonOlay ? Math.round((Date.now() - sonOlay) / 1000) : null, katilimci: kat.length, platform};
+    const t = {aramada: simdiArama, isaret: aramaIsaret, sure: simdiArama && aramaBas ? Math.round((Date.now() - aramaBas) / 1000) : 0, altyazi, son_konusan: sonOlay ? Math.round((Date.now() - sonOlay) / 1000) : null, katilimci: kat.length, platform};
+    // 3.24 (2026-10-30): iki gerçek Meet görüşmesinde (7 katılımcı görülürken) hiçbir "aramada" işareti tutmadı; bir dahaki görüşmede sayfanın neye benzediği
+    // sunucuda görülsün diye kısa bir ipucu: görünür düğme adları ve Meet'in veri öznitelikleri (kişisel veri yok; yalnız arayüz yazıları).
+    if (platform === 'meet' && meetKodu() && !simdiArama){
+      try{
+        const dug = [...document.querySelectorAll('button, [role="button"]')].filter(gorunur).map(x => (x.getAttribute('aria-label') || x.textContent || '').trim().slice(0, 40)).filter(Boolean);
+        t.ipucu = {dugmeler: [...new Set(dug)].slice(0, 20), self: !!document.querySelector('[data-self-name]'), baslik: !!document.querySelector('[data-meeting-title]'),
+                   karo: document.querySelectorAll('[data-participant-id]').length, karo_gorunur: [...document.querySelectorAll('[data-participant-id]')].filter(gorunur).length,
+                   mik: !!document.querySelector('[data-is-muted]'), bekleme: beklemedeMi()};
+      }catch(e){}
+    }
+    return t;
   }
   // 27 Ekim: bir toplantıda altyazı hiç açılmadı, ne konuşmacı adı ne altyazı metni geldi. Başta 4 deneme vardı; artık aramada iki dakikada bir yeniden denenir.
   let sonAltyaziDeneme = 0;
@@ -386,8 +402,10 @@
     bKok.querySelector('.pan').onclick = () => gonder({tur: 'panel_ac'}, r => { if (!r || !r.tamam) bKok.querySelector('.pan').textContent = 'Eklenti simgesine tıklayın'; });
   }
   async function nabiz(){
-    const simdiArama = aramadaMi(); const bekleme = !simdiArama && beklemedeMi();
-    const kat = bekleme ? beklemeKisileri() : katilimcilariTopla(); const toplanti_adi = toplantiAdi();
+    let simdiArama = aramadaMi(); let bekleme = !simdiArama && beklemedeMi();
+    let kat = bekleme ? beklemeKisileri() : katilimcilariTopla(); const toplanti_adi = toplantiAdi();
+    // 3.24: toplantı kodu var, giriş ekranı değil ve ekranda en az iki katılımcı adı okunuyorsa görüşmedeyiz (düğme adları tutmasa da)
+    if (!simdiArama && !bekleme && platform === 'meet' && meetKodu() && kat.filter(adGibi).length >= 2){ simdiArama = true; aramaIsaret = 'katilimci'; }
     if (bekleme) gonder({tur: 'brif'}, beklemeKarti); else if (bKart) bKart.style.display = 'none';
     if (simdiArama && !aramada){ aramada = true; aramaBas = Date.now(); altyaziDeneme = 0; gonder({tur: 'arama_basladi', platform, baslik: toplanti_adi, katilimcilar: kat}); setTimeout(altyaziAc, 4000); }
     if (!simdiArama && aramada){ try{ altyaziTara(true); }catch(e){} altyaziGonder(); aramada = false; aramaBas = 0; gonder({tur: 'arama_bitti'}); }

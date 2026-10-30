@@ -196,7 +196,7 @@ def meet_kayit_canli_durum():
     if not k:
         return jsonify({"kayit": False})
     simdi = time.time()
-    v = {"kayit": True, "ad": k["ad"], "sure": int(simdi - float(k.get("baslangic", simdi))), "sorun": k.get("sorun") or "",
+    v = {"kayit": True, "ad": k["ad"], "sure": int(simdi - float(k.get("baslangic", simdi))), "sorun": k.get("sorun") or "", "kapaniyor": k.get("kapaniyor"),
          "ses_yas": int(simdi - float(k.get("son_ses", simdi))), "uygulama": k.get("uygulama", ""), "parca": len(k.get("parcalar") or [])}
     if v["ses_yas"] > 20 and not v["sorun"]:
         v["sorun"] = "Ses gelmiyor"

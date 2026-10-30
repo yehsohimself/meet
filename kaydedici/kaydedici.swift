@@ -232,6 +232,7 @@ final class Kayit {
     var sorun = ""
     var yedek: AVCaptureSession?      // ekran yokken yalnız mikrofon (2026-10-30)
     var yalnizMik = false
+    var kapaniyor: Int? = nil          // toplantı sinyali kesildi; bu kadar sn sonra kayıt kapanır (arayüz "kapanıyor" der)
     let uygulama: String
     var pencere: String = ""          // toplantı uygulamasının pencere başlığı (Teams/Zoom masaüstü: toplantı adı)
     func pencereBasligi(_ icerik: SCShareableContent) {
@@ -280,6 +281,7 @@ final class Kayit {
         let d: [String: Any] = ["kayit": kayit, "ad": hedef?.deletingPathExtension().lastPathComponent ?? "", "hedef": hedef?.path ?? "",
                                 "baslangic": baslangic.timeIntervalSince1970, "uygulama": uygulama, "pencere": pencere, "sorun": sorun,
                                 "son_ses": (cikti?.sonSes ?? baslangic).timeIntervalSince1970, "guncelleme": Date().timeIntervalSince1970,
+                                "kapaniyor": kapaniyor as Any,
                                 "parcalar": parcalar.map { ["sistem": $0.sistem.path, "mik": $0.mik.path, "ofset": $0.ofset] }]
         if let v = try? JSONSerialization.data(withJSONObject: d) {
             let u = klasor.appendingPathComponent(".kayit_canli.json"); let t = klasor.appendingPathComponent(".kayit_canli.json.tmp")
@@ -620,7 +622,8 @@ final class Gosterge: NSObject {
         if let k = kayit, yuzen {
             let sn = Int(Date().timeIntervalSince(k.baslangic))
             let sure = sn >= 3600 ? String(format: "%d:%02d:%02d", sn / 3600, (sn / 60) % 60, sn % 60) : String(format: "%d:%02d", sn / 60, sn % 60)
-            YuzenGosterge.shared.goster(k.sorun.isEmpty ? "\(sure)  Kaydediliyor" : "\(sure)  \(k.sorun)", sorun: !k.sorun.isEmpty)
+            let metin = k.kapaniyor != nil ? "\(sure)  Kapanıyor · \(k.kapaniyor!) sn" : k.sorun.isEmpty ? "\(sure)  Kaydediliyor" : "\(sure)  \(k.sorun)"
+            YuzenGosterge.shared.goster(metin, sorun: !k.sorun.isEmpty || k.kapaniyor != nil)
         } else { YuzenGosterge.shared.gizle() }
         if let k = kayit {
             let sn = Int(Date().timeIntervalSince(k.baslangic))
@@ -818,7 +821,11 @@ if args.count >= 4 && args[1] == "--izle" {
     var sonPencereBakis = Date.distantPast; var sonSesliToplanti = Date.distantPast; var sesliUyarildi = ""
     let PENCERE_SURE = 300.0          // kayıt sürerken ses/mikrofon gitse de toplantı penceresi açıksa bu kadar beklenir (bağlantı kopup gelebilir)
     let KAPI_SURE = 600.0
-    let BEKLE_BASLA = 6.0, BEKLE_DUR = 45.0, EN_AZ = 60.0, EN_COK = 4 * 3600.0
+    let BEKLE_BASLA = 6.0, BEKLE_DUR = 45.0, BEKLE_DUR_KISA = 20.0, EN_AZ = 60.0, EN_COK = 4 * 3600.0
+    // 2026-10-30: toplantı bitince kayıt 45 sn daha sürüyordu ("Meet kayda devam ediyor"); toplantı penceresi de ekrandan gittiyse 20 sn yeter
+    // (45 sn bağlantı kopup gelme payı: pencere hâlâ açıkken). Elle bitirme: site kayitlar/.kayit_durdur bırakır.
+    let durdurBayrak = kayitKlasoru.appendingPathComponent(".kayit_durdur")
+    try? FileManager.default.removeItem(at: durdurBayrak)
     // Kapatılırken (yeniden başlatma, oturum kapatma) süren kaydı düzgün bitir ve siteye ver
     let sinyal = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
     signal(SIGTERM, SIG_IGN)
@@ -891,10 +898,18 @@ if args.count >= 4 && args[1] == "--izle" {
             bosMikSimdi = false
             if let a = aktif {
                 await a.gerekirseYenidenBaglan()
+                if uyg != nil { sonGorulme = Date(); a.kapaniyor = nil }
+                var sessiz = Date().timeIntervalSince(sonGorulme)
+                var bekle = BEKLE_DUR
+                if uyg == nil {
+                    if await toplantiPenceresi(aktifUyg) == nil { bekle = BEKLE_DUR_KISA }   // pencere de gitti: kısa pay
+                    a.kapaniyor = max(0, Int(bekle - sessiz))
+                }
+                if FileManager.default.fileExists(atPath: durdurBayrak.path) {
+                    try? FileManager.default.removeItem(at: durdurBayrak); log("Kayıt elle bitirildi (Meet'ten)"); sessiz = bekle
+                }
                 a.durumYaz(kayit: true)
-                if uyg != nil { sonGorulme = Date() }
-                let sessiz = Date().timeIntervalSince(sonGorulme)
-                if sessiz >= BEKLE_DUR || Date().timeIntervalSince(a.baslangic) >= EN_COK || !acik {
+                if sessiz >= bekle || Date().timeIntervalSince(a.baslangic) >= EN_COK || !acik {
                     log("Toplantı bitti görünüyor (\(aktifUyg)); kayıt kapatılıyor")
                     let hedef = a.hedef ?? dosyaAdi(kayitKlasoru, a.baslangic)
                     nabizAt(ileri: 1800); let u = await a.durdur(hedef: hedef, enAzSn: EN_AZ)
