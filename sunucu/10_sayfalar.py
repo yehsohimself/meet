@@ -23,6 +23,8 @@ URUN_PORTLARI = {p: k for p, k in {8765: "transcript", 8766: "note", 8767: "ghos
                  if k in URUNLER_KURULU}   # aynı motor, ayrı adresler (2026-10-20; Content 2026-10-23; PT 2026-10-25)
 if "transcript" not in URUNLER_KURULU and "note" in URUNLER_KURULU:
     URUN_PORTLARI[8765] = "note"            # uzantı ve kaydedici 8765 ile konuşur; Studio yoksa bu adres de Meet sayfasını açar
+if 8765 not in URUN_PORTLARI and URUN_PORTLARI:
+    URUN_PORTLARI[8765] = next(iter(URUN_PORTLARI.values()))   # 2026-10-29: tek ürünlü kurulum (ör. yalnız Ghost): ana adres de o ürünü açar
 ANA_URUN = URUN_PORTLARI.get(PORT, "transcript")
 
 

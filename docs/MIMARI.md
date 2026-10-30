@@ -32,15 +32,10 @@ Meet ve ortak motor; kardeş ürünler kurulu değilse kapalıdır. Bu belge kod
 - `sizinti.py`: depoya kişisel bilgi sızmasını denetler (ayarlardaki adlar + genel desenler); duman testi ve commit kancası çağırır.
 
 ## Ürünler
-  altyazı önizlemesi (`studio_onizle.py`), görüntü araması (`sahne_dizin.py`), gelişim döngüsü (`studio_gelisim.py`: araç sürümleri, haftalık
-  takip, öz değerlendirme). Marka serileri `markalar/<kod>/stil.json` ile tanımlanır (`marka.py`); kodda marka adı yoktur.
 - **Meet** (`sunucu/04_toplanti.py`, `16_`, `20_`, `23_`, `25_`; `meet_*.py`, `kisaca.py`, `danisman.py`, `sinyaller.py`, `notlarim.py`,
   `tarifler.py`, `sohbet.py`, `sirketler.py`, `kisiler.py`, `takvim.py`, `gorevler.py`): kayıt (`kaydedici/`, Swift, ScreenCaptureKit) ve Chrome
   uzantısı (`uzanti/`) sinyalleri → yazıya dökme → şirket/müşteri seçimi → Kısaca, danışman notu, sinyaller → Drive ve Asana. Şirketler ve
   müşteriler yalnız `ayarlar.json` `sirketler` listesinden okunur.
-  `yerimleri.py`): keşif (RSS + Google Haberler + izlenen hesaplar) → açı elemesi → günün karışımı → hakem → kartlar; profil `profil/x.json`
-  (ses, görüşler, tercihler, takım, X hesabı).
-  müşteri dosyası (Meet, Asana, Drive); Atölye motoru (`atolye*.py`) araştırma için.
 
 ## Veri (git dışı)
 

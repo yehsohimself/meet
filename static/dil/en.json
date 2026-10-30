@@ -66,7 +66,7 @@
 "Vurgu": "Emphasis",
 "Yatay": "Horizontal",
 "hazır": "ready",
-"Çıkar": "Extract",
+"Çıkar": "Remove",
 "İkisi": "Both",
 "İndir": "Download",
 "İşler": "Jobs",
@@ -293,7 +293,7 @@
 "Kaynak video": "Source video",
 "Kimler vardı": "Who was there",
 "Kontrol edin": "Check",
-"Konuyu yazın": "Enter a topic",
+"Konuyu yazın": "Type a topic",
 "Konuşma dili": "Spoken language",
 "Konuşmacılar": "Speakers",
 "Konuşulanlar": "What was said",
@@ -458,7 +458,7 @@
 "Hepsini başlat": "Start all",
 "Kadrodan çıkar": "Remove from roster",
 "Kanca türleri:": "Hook types:",
-"Kendi araçları": "Their own tools",
+"Kendi araçları": "Own tools",
 "Kesilmiş video": "Trimmed video",
 "Koleksiyon adı": "Collection name",
 "Konular sıkıcı": "Topics are boring",
@@ -492,7 +492,7 @@
 "kanalıma abone": "subscribed to my channel",
 "konuşma tespit": "speech detected",
 "s.startsWith('": "s.startsWith('",
-"size dayanıyor": "depends on you",
+"size dayanıyor": "based on you",
 "sn != null ? `": "sn != null ? `",
 "toplantı kaydı": "meeting recording",
 "· ilk 3 saniye": "· first 3 seconds",
@@ -2215,7 +2215,7 @@
 "<div class=\"gh-d\"><b>Neden şimdi</b><p>${esc(x.neden_simdi)}</p></div>": "<div class=\"gh-d\"><b>Why now</b><p>${esc(x.neden_simdi)}</p></div>",
 "<h5>Açık kalan kırılma</h5><ul class=\"tsliste\">${p.kirilmalar.map(x =>": "<h5>Unresolved breakdowns</h5><ul class=\"tsliste\">${p.kirilmalar.map(x =>",
 ">Bağlam yok; okur neye tepki verdiğinizi görmeli.</span><button class=": ">No context; the reader should see what you're responding to.</span><button class=",
-"Açılan sonuçları uzantı okur; buraya döndüğünüzde gönderi burada çıkar": "The extension reads the results you open; when you return here, the post appears here",
+"Açılan sonuçları uzantı okur; buraya döndüğünüzde gönderi burada çıkar": "The extension reads the results you open; the post shows up here when you come back",
 "Bu takvimdeki toplantıların adı, katılımcıları ve hazırlık notu gelmez": "Meeting names, attendees and prep notes from this calendar aren't included",
 "Claude toplantının tamamını okudu; ne sorarsanız dakikasıyla yanıtlar.": "Claude has read the entire meeting; ask anything and it answers with timestamps.",
 "Cümle görünür, söylenen kelime sarıya döner. Röportaj ve anlatım için.": "The sentence is shown and the spoken word turns yellow. For interviews and narration.",
@@ -3089,7 +3089,7 @@
 "Yazılıyor": "Typing",
 "aralıklar": "intervals",
 "beğenildi": "liked",
-"eğlenceli": "fun",
+"eğlenceli": "playful",
 "konuşmacı": "speaker",
 "Çözümleme": "Analysis",
 "İngilizce": "English",
@@ -3515,13 +3515,13 @@
 "Evet, paylaştım": "Yes, I shared it",
 "Fazla kişiyi birleştir": "Merge extra people",
 "Fikriniz sizin sesinizle gönderiye dönüşür, notlarınıza da eklenir": "Your idea becomes a post in your voice and is added to your notes too",
-"Ghost her gün sizin konularınızdaki yayınları okur, paylaşmaya değer bir ayrıntı bulur ve sizin sesinizle taslak yazar. Düzelttikçe ve reddettikçe öğrenir. Hiçbir şeyi sizin yerinize paylaşmaz.": "Every day, Ghost reads publications on your topics, finds a detail worth sharing, and drafts a post in your voice. It learns as you correct and reject. It never shares anything for you.",
-"Ghost kuruldu. İlk öneriler birkaç dakikada gelir.": "Ghost is set up. The first suggestions will arrive in a few minutes.",
+"Ghost her gün sizin konularınızdaki yayınları okur, paylaşmaya değer bir ayrıntı bulur ve sizin sesinizle taslak yazar. Düzelttikçe ve reddettikçe öğrenir. Hiçbir şeyi sizin yerinize paylaşmaz.": "Every day Ghost reads publications on your topics, finds a detail worth sharing and drafts a post in your voice. It learns as you edit and reject. It never posts anything for you.",
+"Ghost kuruldu. İlk öneriler birkaç dakikada gelir.": "Ghost is set up. Your first suggestions arrive in a few minutes.",
 "Ghost sizi tanıyor…": "Ghost is getting to know you…",
 "Ghost’u kendinize göre kurun": "Set up Ghost your way",
 "Ghost’un sizi nasıl tanıdığı ve neyi öğrendiği.": "How Ghost knows you and what it has learned.",
 "Ghost’un öğrendikleri": "What Ghost has learned",
-"Girişimcilik ve ürün": "Entrepreneurship and product",
+"Girişimcilik ve ürün": "Startups and product",
 "Gönderileriniz bunlardan beslenir: notlarınız, görüşleriniz, yazı konuları.": "Your posts draw from these: your notes, opinions, and writing topics.",
 "Görüşlerim": "My opinions",
 "Görüşünüz": "Your opinion",
@@ -3591,7 +3591,7 @@
 "Savunduğunuz görüşler. Yeni gönderiler bunlarla tutarlı kalır.": "Views you stand by. New posts stay consistent with them.",
 "Sektör haberleri": "Industry news",
 "Ses örneği alınamadı": "Couldn't get a voice sample",
-"Site yanıt vermedi": "Site didn't respond",
+"Site yanıt vermedi": "The app didn't respond",
 "Sizden beklenen açık iş ya da karar yok.": "No open tasks or decisions are waiting on you.",
 "Sizi tanıdığı toplantı": "The meeting where it got to know you",
 "Sizin bakışınız:": "Your take:",
@@ -3696,7 +3696,83 @@
 "’ı işaretleyin. Görüntü kaydedilmez.": "Mark ’. Video isn’t recorded.",
 "✓ cevapladınız": "✓ you answered",
 "Kapalı; toplantılar kendiliğinden kaydedilmez.": "Off; meetings are not recorded automatically.",
-"Toplantılarınıza sorun: “Son toplantıda fiyat konusunda ne karar almıştık?”": "Ask your meetings: “What did we decide about pricing last time?”"
+"Toplantılarınıza sorun: “Son toplantıda fiyat konusunda ne karar almıştık?”": "Ask your meetings: “What did we decide about pricing last time?”",
+"Profil": "Profile",
+"Bir fikir, link ya da yazı bırakın; gönderiye çevireyim": "Drop an idea, a link or a piece of writing; I'll turn it into a post",
+"Bugün.": "Today.",
+"Haftanın hikâyesi:": "Story of the week:",
+"Notlarınız, görüşleriniz, yazı konuları": "Your notes, opinions and writing topics",
+"Tarzınız, Ghost’un öğrendikleri, kaynaklar": "Your style, what Ghost has learned, sources",
+"Nasıl değişsin? Ör. “daha kısa”, “daha esprili”, “ben böyle konuşmam”": "How should it change? E.g. “shorter”, “funnier”, “I don’t talk like that”",
+"Ne değişsin, söyleyin; Ghost yeniden yazar ve tarzınızı öğrenir": "Say what should change; Ghost rewrites it and learns your style",
+"Kopyala, kısalt, bağlantı, kaldır": "Copy, shorten, link, remove",
+"Kendi cevabınız; bir iki cümle yeter": "Your own answer; a sentence or two is enough",
+"Henüz yok. Bir taslağı düzeltin ya da “Yeniden yaz”a ne istediğinizi yazın; ilk ders çıkar.": "Nothing yet. Edit a draft or tell “Rewrite” what you want; the first lesson comes from that.",
+"X yer imlerini aç": "Open X bookmarks",
+"Konular ve kaynaklar": "Topics and sources",
+"Ghost her konuda bu yayınları okur. Akış adresi (RSS) ya da Google Haberler araması ekleyebilirsiniz.": "Ghost reads these publications for each topic. You can add a feed address (RSS) or a Google News search.",
+"Bu konuyu kaldır": "Remove this topic",
+"Şimdi değerlendir": "Review now",
+"Çevrede söylendi denetimi": "Already-said check",
+"bu hafta ölçüm yok": "no measurements this week",
+"Ayırt etme sınavı": "Human-or-AI test",
+"Topluluk Notu provası": "Community Note rehearsal",
+"bir kez açın; uzantı okur.": "open it once; the extension reads it.",
+"RSS adresi ya da aranacak sözcükler": "RSS address or words to search",
+"Son taramada okunamadı": "Couldn't be read in the last scan",
+"Yeni bir konu ekleyin": "Add a new topic",
+"Okuma seçkisi": "Reading digest",
+"Maç": "Match",
+"Yeni öneri": "New suggestion",
+"Toplantılarımdan tara": "Scan my meetings",
+"Henüz öneri yok. “Yeni öneriler”e basın.": "No suggestions yet. Press “New suggestions”.",
+"Konu ekle": "Add topic",
+"Tarama": "Scanning",
+"Ghost’u kur": "Set up Ghost",
+"Tarzınız, konularınız ve her konu için okunacak yayınlar hazırlanıyor. Yaklaşık iki dakika sürer; sayfayı kapatabilirsiniz.": "Ghost is working out your style, your topics and what to read for each one. It takes about two minutes; you can close this page.",
+"Ne iş yapıyorsunuz, kimin için yazıyorsunuz, neyi iyi biliyorsunuz?": "What do you do, who do you write for, what do you know well?",
+"Üç dört konu yeterli. Her biri için okunacak yayınları Ghost seçer; sonra Profil’den değiştirebilirsiniz.": "Three or four topics are enough. Ghost picks what to read for each; you can change it later in Profile.",
+"Her gönderiyi boş bir satırla ayırın. 10-30 örnek sesinizi en iyi öğretir.": "Separate posts with a blank line. 10–30 examples teach Ghost your voice best.",
+"Örnek yapıştırmak istemiyorsanız: Chrome uzantısını kurup X’te profilinizi bir kez açın; gönderileriniz buraya gelir.": "Don't want to paste examples? Install the Chrome extension and open your X profile once; your posts will show up here.",
+"Yaklaşık iki dakika sürer.": "Takes about two minutes.",
+"Önce en az bir konu seçin.": "Pick at least one topic first.",
+"kullaniciadi": "username",
+"Kaynak eklendi; bir sonraki taramada okunur": "Source added; it's read in the next scan",
+"Konu ekleniyor; kaynaklar bir dakika içinde seçilir": "Adding the topic; sources are picked within a minute",
+"Konu kaldırıldı": "Topic removed",
+"Yeni konu için kaynaklar seçiliyor…": "Picking sources for the new topic…",
+"En az bir konu seçin": "Pick at least one topic",
+"Kurulum sürüyor": "Setup is running",
+"Bir konu ekleniyor": "A topic is being added",
+"Akış adresi http ile başlamalı": "The feed address must start with http",
+"Bu adreste okunabilir bir RSS ya da Atom akışı yok": "No readable RSS or Atom feed at this address",
+"Bu adla bir kaynak zaten var": "A source with this name already exists",
+"Pazarlama ve reklam": "Marketing and advertising",
+"Bilim": "Science",
+"Basketbol": "Basketball",
+"Film ve dizi": "Film and TV",
+"Kitaplar": "Books",
+"Moda": "Fashion",
+"Oyunlar": "Games",
+"Kendi projelerim": "My own projects",
+"Güzel hikâyeler": "Good stories",
+"Minik not": "Short note",
+"ciddi": "serious",
+"samimi": "warm",
+"Google’da yükseliyor": "rising on Google",
+"Gündem:": "In the news:",
+"Doğru": "Accurate",
+"Şüpheli": "Doubtful",
+"Reklamcı": "Ad person",
+"Meşgul okur": "Busy reader",
+"Teknolojici": "Tech person",
+"Önerilere tek tek bakın; beğendiğinizi tutun, beğenmediğinizi nedeniyle kaldırın. Ghost her kararınızdan öğrenir": "Go through suggestions one by one; keep what you like, remove the rest with a reason. Ghost learns from every decision",
+"Bu öneriyi listenin sonuna alır": "Moves this suggestion to the end of the list",
+"Kendi cevabınız ya da nasıl yazılmasını istediğiniz": "Your own answer, or how you want it written",
+"okunan: yalnız haber başlığı (gündem)": "read: headline only (news)",
+"Her gün 07.30 ve 14.00’te kendiliğinden taranır.": "Scanned automatically every day at 07:30 and 14:00.",
+"· X, LinkedIn, Instagram, Claude ve benzeri araçlar; haftada bir taranır.": "· X, LinkedIn, Instagram, Claude and similar tools; checked weekly.",
+"Kaynaklar taranıyor…": "Scanning sources…"
 },
 "patterns": [
 [
@@ -5366,6 +5442,118 @@
 [
 "^Şimdi:\\ “(.*?)”$",
 "Now: “$1”"
+],
+[
+"^(\\d+) kaynak$",
+"$1 sources"
+],
+[
+"^(\\d+) taslak$",
+"$1 drafts"
+],
+[
+"^(\\d+) hazır$",
+"$1 ready"
+],
+[
+"^(\\d+) gönderi$",
+"$1 posts"
+],
+[
+"^Google Haberler araması: (.*)$",
+"Google News search: $1"
+],
+[
+"^Önerilerin geldiği yayınlar\\. (\\d+)/(\\d+) çalışıyor\\.$",
+"Where suggestions come from. $1/$2 working."
+],
+[
+"^Şu an okunamayanlar: (.*)\\. Bir sonraki taramada yeniden denenir\\.$",
+"Can't be read right now: $1. They're tried again in the next scan."
+],
+[
+"^(.*); keşifte öne alınıyor\\.$",
+"$1; prioritised in discovery."
+],
+[
+"^(\\d+)/(\\d+) açık$",
+"$1/$2 on"
+],
+[
+"^Zincir olarak · (\\d+) parça$",
+"As a thread · $1 parts"
+],
+[
+"^okunan: (\\d+) kaynağın tam metni$",
+"read: full text of $1 sources"
+],
+[
+"^· İzlenen hesaplardan (\\d+) (?:gönderi|posts)$",
+"· $1 posts from accounts you follow"
+],
+[
+"^(\\d+) kaynak yazdı$",
+"$1 sources wrote about it"
+],
+[
+"^· Günün akışı · (.*)$",
+"· Today's mix · $1"
+],
+[
+"^Günün akışı · (.*)$",
+"Today's mix · $1"
+],
+[
+"^(\\d+) soru cevap bekliyor$",
+"$1 questions waiting for an answer"
+],
+[
+"^(\\d+) · kalite denetiminden geçmeyenler$",
+"$1 · didn't pass the quality check"
+],
+[
+"^değer (\\d)/5 · kaydeder · iletir$",
+"value $1/5 · would save · would share"
+],
+[
+"^değer (\\d)/5 · kaydeder$",
+"value $1/5 · would save"
+],
+[
+"^değer (\\d)/5$",
+"value $1/5"
+],
+[
+"^Bilmeyen okur için yeterince açık değildi: (.*)$",
+"Not clear enough for a reader without context: $1"
+],
+[
+"^Son tarama (.*); (\\d+) haber okundu, (\\d+) öneri çıktı\\. Her gün 07\\.30 ve 14\\.00’te kendiliğinden taranır\\.$",
+"Last scan $1; $2 articles read, $3 suggestions. Scanned automatically every day at 07:30 and 14:00."
+],
+[
+"^7 günde (\\d+) kez çalıştı$",
+"ran $1 times in 7 days"
+],
+[
+"^(\\d+) X hesabı \\((\\d+) takip ettiğiniz, (\\d+) önerilen\\) · (\\d+) Instagram hesabı\\. Listeyi ve favorileri açtığınızda uzantı ekrandakileri yalnızca okur; Ghost keşifte ve alıntı önerirken önce bunlara bakar\\.$",
+"$1 X accounts ($2 you follow, $3 suggested) · $4 Instagram accounts. When you open the list and favourites, the extension only reads what's on screen; Ghost looks at these first when discovering and suggesting quotes."
+],
+[
+"^(\\d+) konuda sizin cevabınız merkezde$",
+"your answer is at the centre of $1 topics"
+],
+[
+"^@(\\S+) bu haberi X'te paylaştıysa bul ↗$",
+"Find it if @$1 posted this story on X ↗"
+],
+[
+"^@(\\S+) bu haberi X’te paylaştıysa bul ↗$",
+"Find it if @$1 posted this story on X ↗"
+],
+[
+"^↳ @(\\S+) bu haberi X’te paylaştıysa bul ↗$",
+"↳ Find it if @$1 posted this story on X ↗"
 ]
 ]
 }

@@ -7,6 +7,7 @@ import pytest
 
 from tests.conftest import transkript_yaz
 
+misafir = pytest.mark.skipif(not (Path(__file__).resolve().parents[1] / "sunucu" / "22_misafir.py").exists(), reason="Davetli kapısı bu kurulumda yok (ör. Ghost deposu)")
 studio = pytest.mark.skipif(not (Path(__file__).resolve().parents[1] / "sunucu" / "21_studio.py").exists(), reason="Studio bu kurulumda yok (ör. Meet deposu)")
 
 J = {"Content-Type": "application/json"}
@@ -108,6 +109,7 @@ def token_bul(kok, gid):
     return next(k["token"] for k in json.loads((kok / "misafir" / "davetler.json").read_text(encoding="utf-8"))["kisiler"] if k["id"] == gid)
 
 
+@misafir
 def test_davetsiz_kapi_kapali(misafir_istemci):
     assert misafir_istemci.get("/", base_url=M).status_code == 403
     assert misafir_istemci.get("/api/gecmis", base_url=M).status_code == 401
@@ -115,6 +117,7 @@ def test_davetsiz_kapi_kapali(misafir_istemci):
     assert misafir_istemci.get("/d/yanlis_kod_1234567890abcdefghij", base_url=M).status_code == 403
 
 
+@misafir
 def test_davetli_yalnizca_kendi_kayitlarini_gorur(istemci, misafir_istemci, kok):
     transkript_yaz(kok, "transkript_tr_sahip", baslik="Sahibin videosu")
     gid = davet_olustur(istemci, "Kontrol")
@@ -144,6 +147,7 @@ def test_davetli_yalnizca_kendi_kayitlarini_gorur(istemci, misafir_istemci, kok)
         assert b"Ajans Test" not in gov(sayfa)
 
 
+@misafir
 def test_davet_oran_siniri(misafir_istemci):
     kodlar = [misafir_istemci.get("/d/yanlis_kod_1234567890abcdefghij", base_url=M, environ_base={"REMOTE_ADDR": "10.9.9.9"}).status_code for _ in range(25)]
     assert kodlar[0] == 403 and kodlar[-1] == 429
@@ -192,10 +196,12 @@ def test_kurulum_denetimi(istemci):
     assert {a["kod"] for a in j["adimlar"]} >= {"ffmpeg", "model", "yazi", "disk"} and "hazir" in j
 
 
+@misafir
 def test_davetli_kurulum_denetimini_gormez(misafir_istemci):
     assert misafir_istemci.get("/api/kurulum", base_url=M).status_code in (401, 403)
 
 
+@misafir
 def test_sikistirma_suzgeclerden_sonra_calisir(istemci, misafir_istemci, kok):
     """Tarayıcı gzip ister: sıkıştırma bütün süzgeçlerden SONRA olmalı (2026-10-29: önce çalışıyor, davetli listesi süzülmüyordu)."""
     import gizli

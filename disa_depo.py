@@ -63,7 +63,7 @@ def kes(urun, hedef, log=print):
 
     for p in U["parcalar"]:
         kopyala(KOK / "sunucu" / f"{p}.py", f"sunucu/{p}.py")
-    for m in sorted(set(U["moduller"]) | set(_kapanis(U["parcalar"], U["kapanis"]) if U.get("kapanis") else [])):
+    for m in sorted(set(U["moduller"]) | set(_kapanis(U["parcalar"], U["kapanis"], U.get("haric", MEET_HARIC)) if U.get("kapanis") else [])):
         if (KOK / f"{m}.py").exists():
             kopyala(KOK / f"{m}.py", f"{m}.py")
         else:
@@ -113,7 +113,7 @@ def kes(urun, hedef, log=print):
     for f in list(hedef.rglob("*")):
         rel = f.relative_to(hedef).as_posix()
         if f.is_file() and rel not in kopyalanan and not rel.startswith(".git/") and f.suffix in {".py", ".js", ".css", ".html", ".svg", ".png", ".md", ".txt", ".json", ".webmanifest", ".command", ".mp4", ".ini", ".sh"} \
-                and not rel.startswith(("kayitlar/", "profil/", "indirilenler/", "yuklemeler/", ".onbellek/", "static/derlenmis/", "pt/", "pt_medya/", "modeller/")) and rel not in ("ayarlar.json", "sesler.json", "takip.json", "CLAUDE.md"):
+                and not rel.startswith(("kayitlar/", "profil/", "ghost/", "indirilenler/", "yuklemeler/", ".onbellek/", "static/derlenmis/", "pt/", "pt_medya/", "modeller/", ".yedek/", ".cop/")) and rel not in ("ayarlar.json", "sesler.json", "takip.json", "CLAUDE.md"):
             f.unlink()
     for d in sorted((x for x in hedef.rglob("*") if x.is_dir() and ".git" not in x.parts), key=lambda x: -len(x.parts)):
         if not any(d.iterdir()):
@@ -313,6 +313,32 @@ def _meet_son(hedef):
         gi.write_text(gi.read_text(encoding="utf-8") + "!uzanti/ikonlar/*.png\n", encoding="utf-8")
 
 
+# ----------------------------------------------------------------------------- Ghost (2026-10-29)
+# Ghost + yazıya dökme motoru (video ve podcast linklerinden taslak için). Meet, Content, Couple, PT, Atölye modülleri alınmaz; Ghost'un bunları
+# çağıran yerleri try/except ile korunur. Kişiye özel kaynaklar, konular ve ses kodda değil: ilk açılışta kullanıcı kurar (ghost_kurulum.py).
+GHOST_HARIC = re.compile(r"^(atolye|content|couple|pt|pt_|meet_|danisman|kisaca|sinyaller|onbrifing|canli|davetler|karar_zinciri|toplanti_kapisi|"
+                         r"gorevler|sozler|kisiler|tarifler|sesli_ozet|teslim|sirketler)")
+URUNLER["ghost"] = {
+    "ad": "Ghost",
+    "parcalar": ["00_baslangic", "01_yardimcilar", "02_isci", "03_video_isleri", "07_cekirdek", "07_ghost", "09_cekirdek", "10_sayfalar",
+                 "11_ozellik_sayaci", "12_api", "16_altyapi_ve_meet", "17_disa_aktarim", "18_indirilenler", "19_ghost_gelisim", "24_guvenlik",
+                 "32_ghost_kurulum"],
+    "kapanis": ["site", "transkript", "sesnot", "duman_testi", "yeniden_baslat", "sizinti", "yedek", "geri_yukle", "isimlendir", "takip",
+                "ghost_kurulum", "paylasim", "kesif", "karisim", "tetik", "konu_toplantisi", "fikir_kartlari", "hesaplar", "performans", "yerimleri",
+                "ghost_blog", "ghost_defter", "ghost_gelisim", "ghost_hikaye", "ghost_kaynak", "ghost_kendi", "ghost_rehber", "ghost_tempo", "ghost_yanit",
+                "abonelik", "bultenler", "kantan", "seckiler", "reklam_arsivi", "oranlar", "dil_cevir"],
+    "haric": GHOST_HARIC,
+    "moduller": [],
+    "static": ["index.html", "ghost_tek.html", "dil.js", "dil", "manifest.webmanifest", "ikon-180.png", "ikon-192.png", "ikon-512.png",
+               "ikon-512-maskable.png", "il", "logo", "ikon"],
+    "dosyalar": ["requirements.txt", "pytest.ini", "LICENSE", "uzanti/x.js", "uzanti/ig.js", "uzanti/ikonlar",
+                 "tests/conftest.py", "tests/test_birimler.py", "tests/test_site.py", "tests/test_ghost_tempo.py", "tests/test_ghost_kurulum.py"],
+    "sablon": "disa/ghost",
+    "requirements_cikar": ["python-pptx", "scenedetect", "opencv-python-headless", "pywebpush", "auto-editor", "shazamio", "segno"],
+    "komut": ("", "Ghost.command"),
+}
+
+
 def _kapanis(parcalar, tohum, haric=MEET_HARIC):
     """Parçaların ve tohum modüllerin içe aktardığı yerel modüllerin kapanışı (kardeş ürün modülleri hariç)."""
     yerel = {p.stem for p in KOK.glob("*.py")}
@@ -354,7 +380,16 @@ def _mimari(urun):
     # ürün bölümünden yalnız bu ürün ve motor kalır
     a = s.find("## Ürünler"); b = s.find("## Veri")
     if a > 0 and b > a:
-        satirlar = [l for l in s[a:b].splitlines() if l.startswith("## ") or l.startswith(f"- **{URUNLER[urun]['ad']}**") or (l.startswith("  ") and "**" not in l)]
+        satirlar, tut = [], False                         # bir madde ve devam satırları birlikte kalır ya da çıkar
+        for l in s[a:b].splitlines():
+            if l.startswith("## "):
+                satirlar.append(l); tut = False
+            elif l.startswith("- "):
+                tut = l.startswith(f"- **{URUNLER[urun]['ad']}**")
+                if tut:
+                    satirlar.append(l)
+            elif l.startswith("  ") and tut:
+                satirlar.append(l)
         s = s[:a] + "\n".join(satirlar) + "\n\n" + s[b:]
     return s.replace("Altı ürün, tek sunucu süreci, ortak motor.", f"{URUNLER[urun]['ad']} ve ortak motor; kardeş ürünler kurulu değilse kapalıdır.")
 

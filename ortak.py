@@ -78,3 +78,28 @@ def guvenli_ad(s, en_cok=100, varsayilan="Video"):
     s = _AD_KOTU.sub(" ", str(s or "")).strip()
     s = re.sub(r"\s+", " ", s)[:en_cok].strip(" .")
     return s or varsayilan
+
+
+def kendi_depolar(klasor=None):
+    """Ghost'un 'kendi işiniz' gönderileri için okunan git depoları (2026-10-29, Ghost herkese açılırken). ayarlar.json `kendi_depolar`:
+    yol listesi; anahtar hiç yoksa bu kurulumun kendi deposu (eski davranış), boş liste = kapalı. Yalnız var olan klasörler."""
+    k = Path(klasor) if klasor else KLASOR
+    L = ayar(k).get("kendi_depolar")
+    yollar = [k] if L is None else [Path(str(x)).expanduser() for x in L if str(x).strip()]
+    return [p for p in yollar if (p / ".git").exists()]
+
+
+def git_kayitlari(sure, klasor=None, en_cok=80):
+    """Kendi depolarından çalışma kayıtları: [(kısa kod, tarih, konu)], yeniden eskiye. sure: git --since değeri ('36 hours ago', 'midnight')."""
+    import subprocess
+    out = []
+    for d in kendi_depolar(klasor):
+        try:
+            r = subprocess.run(["git", "-C", str(d), "log", f"--since={sure}", "--pretty=%h|%cs|%ct|%s"], capture_output=True, text=True, timeout=10)
+        except Exception:  # noqa: BLE001
+            continue
+        for x in r.stdout.splitlines():
+            p = x.strip().split("|", 3)
+            if len(p) == 4:
+                out.append((int(p[2]) if p[2].isdigit() else 0, p[0], p[1], p[3]))
+    return [(h, t, s) for _, h, t, s in sorted(out, reverse=True)][:en_cok]

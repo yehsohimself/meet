@@ -29,8 +29,9 @@ def hedef_klasor():
         a = json.loads((KLASOR / "ayarlar.json").read_text(encoding="utf-8"))
     except Exception:  # noqa: BLE001
         a = {}
-    kok = Path(a.get("drive_yol") or "~/Desktop/Drive").expanduser()
-    return (kok if kok.is_dir() else KLASOR / ".yedek") / "Video Hub Yedek"
+    # 2026-10-29: yalnız ayarlanmış Drive klasörüne; eskiden ayar yoksa ~/Desktop/Drive tahmin ediliyordu (başka kurulumların yedeği oraya karışıyordu)
+    kok = Path(a["drive_yol"]).expanduser() if a.get("drive_yol") else None
+    return (kok if kok and kok.is_dir() else KLASOR / ".yedek") / "Video Hub Yedek"
 
 
 EN_BUYUK_MB = 200          # tek dosya sınırı (yanlışlıkla devasa bir dosya zip'e girmesin)
