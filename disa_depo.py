@@ -244,7 +244,7 @@ URUNLER["pt"] = {
 URUNLER["content"] = {
     "ad": "Content",
     "parcalar": [],
-    "moduller": ["content", "content_site", "content_sunucu", "content_yontem", "content_kanit", "content_araclar", "content_dogrulama",
+    "moduller": ["content", "content_site", "content_sunucu", "content_yontem", "content_kanit", "content_araclar", "content_dogrulama", "content_benzer",
                  "content_test", "claude_yaz", "goruntu", "sesnot", "ortak", "gizli", "sizinti"],
     "static": ["content.html", "logo/content.svg"],
     "dosyalar": ["LICENSE", "pytest.ini"],

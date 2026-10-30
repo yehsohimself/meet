@@ -3772,7 +3772,22 @@
 "okunan: yalnız haber başlığı (gündem)": "read: headline only (news)",
 "Her gün 07.30 ve 14.00’te kendiliğinden taranır.": "Scanned automatically every day at 07:30 and 14:00.",
 "· X, LinkedIn, Instagram, Claude ve benzeri araçlar; haftada bir taranır.": "· X, LinkedIn, Instagram, Claude and similar tools; checked weekly.",
-"Kaynaklar taranıyor…": "Scanning sources…"
+"Kaynaklar taranıyor…": "Scanning sources…",
+"Hazır · toplantıya girdiğinizde kayıt başlar": "Ready · recording starts when you join a meeting",
+"Kaydediliyor": "Recording",
+"Nasıl düzelir?": "How to fix it",
+"Kayıt göstergesi": "Recording indicator",
+"Kayıt sürerken ekranın sağ üstünde küçük bir hap: kırmızı nokta ve süre. Her uygulamanın üstünde durur; sürükleyebilirsiniz, tıklayınca Meet açılır.": "A small pill in the top right of the screen while recording: red dot and timer. It stays above every app; you can drag it, and a click opens Meet.",
+"Kayıt göstergesi açık": "Recording indicator on",
+"Kayıt göstergesi kapalı": "Recording indicator off",
+"Kayıt yardımcısı yanıt vermiyor": "The recording helper is not responding",
+"Kayıt yardımcısı hiç çalışmamış": "The recording helper has never run",
+"Ekran ve Sistem Sesi Kaydı izni yok; karşı tarafın sesi alınamaz": "No Screen & System Audio Recording permission; the other side's audio cannot be captured",
+"Mikrofon izni yok; sizin sesiniz alınamaz": "No microphone permission; your own voice cannot be captured",
+"Toplantı kaydedilmiyor": "Meeting is not being recorded",
+"Toplantı kaydedilemiyor": "Meeting cannot be recorded",
+"Kaydedici takılmıştı": "The recorder had stalled",
+"Toplantı yalnız mikrofondan kaydediliyor": "Meeting is being recorded from the microphone only"
 },
 "patterns": [
 [

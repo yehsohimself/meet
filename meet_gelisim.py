@@ -423,10 +423,25 @@ def saglik():
             son_satir = kl.read_text(encoding="utf-8", errors="replace").strip().splitlines()[-1]
         except Exception:  # noqa: BLE001
             pass
-        if "başlatılamadı" in son_satir or "izin" in son_satir.lower():
+        # 2026-10-30: süreç "çalışıyor" görünürken izleme döngüsü askıda kalabiliyor (nabız) ve izinler sessizce düşebiliyor (toplantı başlamadan görülsün)
+        try:
+            nabiz_yas = time.time() - (KAYIT / ".kaydedici_nabiz").stat().st_mtime
+        except OSError:
+            nabiz_yas = None
+        try:
+            izin = json.loads((KAYIT / ".kaydedici_izin.json").read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            izin = {}
+        if nabiz_yas is not None and nabiz_yas > 180:
+            ekle("kaydedici", "Otomatik kayıt", "hata", f"Kayıt yardımcısı {int(nabiz_yas // 60)} dakikadır yanıt vermiyor; kendiliğinden yeniden başlatılır.", "Olmazsa Mac’i yeniden başlatın")
+        elif izin.get("ekran") is False:
+            ekle("kaydedici", "Otomatik kayıt", "hata", "Ekran ve Sistem Sesi Kaydı izni yok; karşı tarafın sesi alınamaz.", "Sistem Ayarları → Gizlilik ve Güvenlik → Ekran ve Sistem Sesi Kaydı → Transkript Kaydedici")
+        elif izin.get("mikrofon") == "yok":
+            ekle("kaydedici", "Otomatik kayıt", "hata", "Mikrofon izni yok; sizin sesiniz alınamaz.", "Sistem Ayarları → Gizlilik ve Güvenlik → Mikrofon → Transkript Kaydedici")
+        elif "başlatılamadı" in son_satir or "izin" in son_satir.lower():
             ekle("kaydedici", "Otomatik kayıt", "hata", "Son kayıt denemesi başarısız: " + son_satir[-120:], "Sistem Ayarları → Gizlilik → Ekran ve Sistem Sesi Kaydı → Transkript Kaydedici")
         else:
-            ekle("kaydedici", "Otomatik kayıt", "ok", "Çalışıyor.")
+            ekle("kaydedici", "Otomatik kayıt", "ok", "Çalışıyor" + (f"; izinler tamam, son kontrol {int(nabiz_yas)} sn önce." if nabiz_yas is not None else "."))
     # Chrome uzantısı
     try:
         u = json.loads((KAYIT / ".uzanti_durum.json").read_text(encoding="utf-8"))

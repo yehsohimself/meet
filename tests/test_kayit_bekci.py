@@ -84,3 +84,22 @@ def test_ajan_yuklu_degilse_kurulur(site, monkeypatch):
     (site.KLASOR / "Library" / "LaunchAgents" / "com.yehso.transkript.kaydedici.plist").write_text("x")
     site.KAYIT_BEKCI["yeniden"] = 0.0
     assert site._kaydedici_yeniden("deneme") and calisan[0][1] == "kickstart" and calisan[1][1] == "bootstrap"
+
+
+def test_kayit_sagligi(site, istemci, monkeypatch):
+    import json
+    monkeypatch.setattr(site, "meet_kayit_canli", lambda: None)
+    site.KAYIT.mkdir(exist_ok=True)
+    ay = site.ayarlar_oku(); ay["oto_kayit"] = True; site.ayarlar_yaz(ay)
+    (site.KAYIT / ".kaydedici_nabiz").write_text("1")
+    (site.KAYIT / ".kaydedici_izin.json").write_text(json.dumps({"ekran": True, "mikrofon": "var", "zaman": time.time()}))
+    (site.KAYIT / ".kayit_hata.json").unlink(missing_ok=True)
+    v = istemci.get("/api/meet/kayit-saglik").get_json()
+    assert v["durum"] == "hazir" and not v["sorunlar"]
+    (site.KAYIT / ".kaydedici_izin.json").write_text(json.dumps({"ekran": False, "mikrofon": "yok", "zaman": time.time()}))
+    v = istemci.get("/api/meet/kayit-saglik").get_json()
+    assert v["durum"] == "sorun" and {s["kod"] for s in v["sorunlar"]} == {"izin_ekran", "izin_mik"}
+    monkeypatch.setattr(site, "meet_kayit_canli", lambda: {"ad": "Toplantı x", "baslangic": time.time() - 90, "son_ses": time.time(), "sorun": ""})
+    v = istemci.get("/api/meet/kayit-saglik").get_json()
+    assert v["durum"] == "kayit" and v["kayit"]["sure"] >= 89
+    (site.KAYIT / ".kaydedici_izin.json").unlink()

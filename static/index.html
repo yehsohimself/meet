@@ -1231,6 +1231,13 @@
   .tdsat .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--fill2);margin-right:7px;vertical-align:1px}
   .tdsat .dot.ok{background:#34C759}
   .tdsat .uyar{color:var(--vurgu);font-weight:600;cursor:help}
+  .khp{display:inline-flex;align-items:center;gap:8px;padding:5px 13px 5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:13px;line-height:1.2;vertical-align:middle;cursor:default}
+  .khp i{width:8px;height:8px;border-radius:50%;background:var(--fill2);flex:none}
+  .khp.ok i{background:#34C759;box-shadow:0 0 0 3px rgba(52,199,89,.18)}
+  .khp.rec{border-color:rgba(255,59,48,.45);color:#fff;background:rgba(255,59,48,.14)} .khp.rec i{background:#FF3B30;animation:khpNabiz 1.1s ease-in-out infinite}
+  .khp.hata{border-color:rgba(var(--vurgu-rgb),.55);background:rgba(var(--vurgu-rgb),.1)} .khp.hata i{background:var(--vurgu)}
+  @keyframes khpNabiz{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,59,48,.45)}50%{opacity:.55;box-shadow:0 0 0 5px rgba(255,59,48,0)}}
+  @media (prefers-reduced-motion: reduce){.khp.rec i{animation:none}}
   .thero:has(.kayitta) .tdsat{display:none}
   .tdsat .textbtn{font-size:13px;padding:0;height:auto}
   body.urun-note .kayit{max-width:640px;margin:22px auto 0!important;border:0!important;border-radius:20px!important;background:var(--surface)!important}
@@ -2710,6 +2717,7 @@
   <div class="row" id="ayDanismanRow"><div class="l">Koçluk notu<small>Her toplantıdan sonra yalnızca size: nasıl konuştunuz, nerede daha iyi olabilirdi, sırada ne var. Paylaşılan notlara ve Drive’a girmez.</small></div><button class="tog" id="ayDanisman" role="switch" aria-checked="true" type="button" aria-label="Koçluk notu"></button></div>
   <div class="row" id="ayClaudeTopRow"><div class="l">Toplantılarda da Claude kullan<small>Özet, notlar, toplantı adı ve sorular Claude ile hazırlanır; toplantı metni Anthropic’e gider. Kapatırsanız toplantılar yalnızca bu bilgisayarda işlenir.</small></div><button class="tog" id="ayClaudeTop" role="switch" aria-checked="true" type="button" aria-label="Toplantılarda da Claude kullan"></button></div>
   <div class="row"><div class="l">Otomatik toplantı kaydı<small id="ayOtoNot">Zoom, Teams, Google Meet ya da FaceTime’da görüşme başlayınca kayıt kendiliğinden başlar; bitince notlar hazırlanır. Kaydettiğinizi toplantıdakilere söyleyin; birçok ülkede izin gerekir.</small></div><button class="tog" id="ayOto" role="switch" aria-checked="true" type="button"></button></div>
+  <div class="row" id="ayGostergeRow"><div class="l">Kayıt göstergesi<small>Kayıt sürerken ekranın sağ üstünde küçük bir hap: kırmızı nokta ve süre. Her uygulamanın üstünde durur; sürükleyebilirsiniz, tıklayınca Meet açılır.</small></div><button class="tog" id="ayGosterge" role="switch" aria-checked="true" type="button"></button></div>
   <div class="row"><div class="l">Takvim<small id="ayTakvimNot">Toplantı adı ve katılımcılar Google Takvim’den alınır. Google Takvim → Ayarlar → takviminiz → “iCal biçimindeki gizli adres”i kopyalayıp yapıştırın.</small></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end" id="ayTakvimAct"></div></div>
   <div class="row"><div class="l">Google Drive<small id="ayDriveNot"></small></div><div style="display:flex;gap:6px;align-items:center" id="ayDriveAct"></div></div>
   <div class="row" id="ayDriveKlasorRow"><div class="l">Drive’da klasör<small>Toplantılar bu klasörün altına müşteri, tarih ve konu adıyla düşer.</small></div><input id="ayDriveKlasor" type="text" style="width:200px;max-width:45%"></div>
@@ -3399,11 +3407,18 @@ $('#markaEkle').onclick = async e => { let g = []; try{ g = await (await fetch('
   popover(e.currentTarget, aday.length ? aday.map(x => [x.baslik.slice(0, 60), async () => { await fetch('/api/marka-etiket/' + encodeURIComponent(x.temel), {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({marka: MARKA_KOD})}); toast('Seriye eklendi'); markaCiz(); }]) : [['Kitaplıkta uygun transkript yok', () => {}]]); };
 async function toplantiDurum(){
   canliBaslat();
-  let d = null, u = null, tk = null; try{ d = await (await fetch('/api/drive')).json(); u = await (await fetch('/api/uzanti/durum')).json(); }catch(e){}
+  let d = null, u = null, tk = null, ks = null; try{ d = await (await fetch('/api/drive')).json(); u = await (await fetch('/api/uzanti/durum')).json(); }catch(e){}
   try{ tk = await (await fetch('/api/takvim')).json(); }catch(e){}
-  const kayitta = !!(u && u.kayit);
+  try{ ks = URUN === 'note' ? await (await fetch('/api/meet/kayit-saglik')).json() : null; }catch(e){}
+  const kayitta = !!(u && u.kayit) || !!(ks && ks.durum === 'kayit');
   { const sat = $('#tDurumSat'); if (sat){ const p = [];
-      p.push(d && d.oto_kayit ? `<span class="dot ok"></span>Toplantıya girdiğinizde kayıt kendiliğinden başlar` : `<span class="dot"></span>Otomatik kayıt kapalı · <button class="textbtn" type="button" data-ac="ayar">Aç</button>`);
+      // 2026-10-30: "kayıt kendiliğinden başlar" cümlesi kaydedici takılıyken bile yazıyordu. Artık gerçek durum: kaydedici nabzı, izinler, süren kayıt.
+      if (ks && ks.durum === 'kayit'){ const sn = ks.kayit.sure, sure_ = sn >= 3600 ? `${Math.floor(sn / 3600)}:${String(Math.floor(sn / 60) % 60).padStart(2, '0')}:${String(sn % 60).padStart(2, '0')}` : `${Math.floor(sn / 60)}:${String(sn % 60).padStart(2, '0')}`;
+        p.push(`<span class="khp rec" title="${esc(ks.kayit.sorun || 'Ses geliyor; toplantı bitince notlar hazırlanır')}"><i></i>${ks.kayit.sorun ? esc(ks.kayit.sorun) : 'Kaydediliyor'} · ${sure_}${u && u.baslik ? ' · ' + esc(u.baslik) : ''}</span>`); }
+      else if (ks && ks.durum === 'sorun'){ const s0 = ks.sorunlar[0];
+        p.push(`<span class="khp hata" title="${esc(s0.cozum || '')}"><i></i>Kayıt hazır değil: ${esc(s0.metin)}</span>${s0.kod === 'oto_kayit' ? ' · <button class="textbtn" type="button" data-ac="ayar">Aç</button>' : s0.cozum ? ' · <button class="textbtn" type="button" data-ac="cozum" data-m="' + esc(s0.cozum) + '">Nasıl düzelir?</button>' : ''}`); }
+      else if (ks) p.push(`<span class="khp ok" title="Kaydedici ${ks.kontrol != null ? ks.kontrol + ' sn önce' : 'az önce'} kontrol edildi; izinler tamam. Zoom, Teams, Google Meet ya da FaceTime’da görüşme başlayınca kayıt kendiliğinden başlar."><i></i>Hazır · toplantıya girdiğinizde kayıt başlar</span>`);
+      else p.push(d && d.oto_kayit ? `<span class="dot ok"></span>Toplantıya girdiğinizde kayıt kendiliğinden başlar` : `<span class="dot"></span>Otomatik kayıt kapalı · <button class="textbtn" type="button" data-ac="ayar">Aç</button>`);
       if (d && d.yol && d.acik) p.push(`notlar Drive’a kaydedilir`);
       if (u && u.disk_gb != null && u.disk_gb < 10) p.push(`<span class="uyar" title="Toplantı kayıtları için en az 10 GB boş yer önerilir. Çöp’ü boşaltın; büyük dosyaları silin.">Diskte ${String(u.disk_gb).replace('.', ',')} GB kaldı</span>`);   // 2026-10-28
       if (u && u.mik && u.mik.bos_mik_sn >= 1200){ const dk = Math.round(u.mik.bos_mik_sn / 60), sure_ = dk < 90 ? dk + ' dakikadır' : Math.round(dk / 60) + ' saattir';
@@ -3415,7 +3430,8 @@ async function toplantiDurum(){
       const bozuk = (tk?.takvimler || []).filter(k => k.hata);
       if (bozuk.length) p.push(`<button class="textbtn uyar" type="button" data-ac="ayar" title="Bu takvimdeki toplantıların adı, katılımcıları ve hazırlık notu gelmez">Bir takvim adresi çalışmıyor</button>`);
       else if (tk && !tk.bagli) p.push(`<button class="textbtn" type="button" data-ac="ayar">Takviminizi ekleyin</button>`);
-      sat.innerHTML = p.join(' · '); sat.querySelectorAll('[data-ac="ayar"]').forEach(x => x.addEventListener('click', () => $('#ayarBtn').click())); } }
+      sat.innerHTML = p.join(' · '); sat.querySelectorAll('[data-ac="ayar"]').forEach(x => x.addEventListener('click', () => $('#ayarBtn').click()));
+      sat.querySelectorAll('[data-ac="cozum"]').forEach(x => x.addEventListener('click', () => sheet('Nasıl düzelir?', x.dataset.m, 'Tamam', () => {}, false))); } }
   $('#tdurum').innerHTML = `
     <div class="card"><b><span class="on ${d && d.oto_kayit ? (kayitta ? 'rec' : 'ok') : ''}"></span>${kayitta ? 'Şu an kaydediliyor' : d && d.oto_kayit ? 'Otomatik kayıt açık' : 'Otomatik kayıt kapalı'}</b><small>${kayitta ? esc(u.baslik || u.platform || '') : 'Zoom, Teams, Meet ya da FaceTime mikrofonu açınca kayıt kendiliğinden başlar.'}</small></div>
     <div class="card"><b><span class="on ${u && u.aktif ? 'ok' : ''}"></span>Chrome uzantısı</b><small>${u && u.aktif ? 'Toplantı sekmesi açık' + (u.katilimcilar?.length ? ' · ' + u.katilimcilar.slice(0,4).map(esc).join(', ') : '') : 'Google Meet ya da Teams sekmesi açıkken katılımcı adlarını ve kimin konuştuğunu alır.'}</small></div>
@@ -6451,6 +6467,7 @@ async function driveCiz(a){
   $('#ayTerimler').value = (a.sozluk || []).join(', ');
   $('#ayTerimler').onchange = async () => { await fetch('/api/ayarlar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({sozluk: $('#ayTerimler').value.split(',').map(x => x.trim()).filter(Boolean)})}); toast('Terimler kaydedildi'); };
   $('#ayMusteriler').onchange = async () => { await fetch('/api/ayarlar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({musteriler: $('#ayMusteriler').value.split(/[\n;]/).map(x => x.trim()).filter(Boolean)})}); toast('Müşteri listesi kaydedildi'); };
+  if ($('#ayGosterge')){ $('#ayGosterge').setAttribute('aria-checked', d.kayit_gostergesi !== false); $('#ayGosterge').onclick = async () => { const v = $('#ayGosterge').getAttribute('aria-checked') !== 'true'; $('#ayGosterge').setAttribute('aria-checked', v); await fetch('/api/ayarlar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({kayit_gostergesi: v})}); toast(v ? 'Kayıt göstergesi açık' : 'Kayıt göstergesi kapalı'); }; }
   $('#ayOto').setAttribute('aria-checked', !!d.oto_kayit); $('#ayOto').onclick = async () => { const v = $('#ayOto').getAttribute('aria-checked') !== 'true'; $('#ayOto').setAttribute('aria-checked', v); await fetch('/api/ayarlar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({oto_kayit: v})}); toast(v ? 'Otomatik kayıt açık' : 'Otomatik kayıt kapalı'); };
   if (!d.kaydedici) $('#ayOtoNot').textContent = 'Kayıt yardımcısı kurulu değil.';
   const tog = `<button class="tog" id="ayDrive" role="switch" aria-checked="${!!d.acik}" type="button" title="Drive’a ekleme"></button>`;

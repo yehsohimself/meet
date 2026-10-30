@@ -324,7 +324,7 @@
      nereye gider: Drive, Asana) · Müşteriler · Paylaşım (ağ, telefon, davetler) · Sistem. Satırlar yerinden taşınır; kimlikler değişmez. */
   const AYAR = [
     ['genel', 'Genel', [['Siz', ['#ayAdim', '#ayEpostalar', '#ayDil']], ['Yapay zekâ', ['#ayClaudeAct', '#ayClaudeKullanim', '#ayClaudeTop', '#ayOzet', '#ayOzetDili']]]],
-    ['kayit', 'Kayıt', [['', ['#ayOto', '#ayKapi', '#ayAsistan', '#ayTelefon']], ['Kim, ne zaman', ['#ayTakvimAct', '#aySesler']]]],
+    ['kayit', 'Kayıt', [['', ['#ayOto', '#ayGosterge', '#ayKapi', '#ayAsistan', '#ayTelefon']], ['Kim, ne zaman', ['#ayTakvimAct', '#aySesler']]]],
     ['notlar', 'Notlar', [['Toplantıdan sonra', ['#ayNotlar', '#ayDanisman', '#ayGorev', '#ayOnBrif', '#ayOnBrifEp', '#ayHaftalik']],
                           ['Notlar nereye gider', ['#ayDriveAct', '#ayDriveKlasor', '#ayAsanaNot']]]],
     ['musteri', 'Müşteriler', [['', ['#ayMusteriler', '#ayUcret']]]],

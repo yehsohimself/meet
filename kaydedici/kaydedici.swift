@@ -256,9 +256,9 @@ final class Kayit {
     /// Akış koptuysa ya da 15 sn'dir ses gelmiyorsa eski parçayı kapatıp yenisini açar (en çok 10 sn'de bir dener).
     func gerekirseYenidenBaglan() async {
         if yalnizMik {                                                      // ekran geri geldi mi? (30 sn'de bir bakılır)
-            guard Date().timeIntervalSince(sonBaglanma) >= 30 else { return }
+            guard Date().timeIntervalSince(sonBaglanma) >= ekranBakAraligi else { return }
             sonBaglanma = Date()
-            if let ic = try? await paylasilan(false, onScreenWindowsOnly: false), !ic.displays.isEmpty { log("Ekran geri geldi; tam kayda geçiliyor"); await yenidenBaglan() }
+            if let ic = try? await paylasilan(false, onScreenWindowsOnly: false), !ekranlar(ic).isEmpty { log("Ekran geri geldi; tam kayda geçiliyor"); await yenidenBaglan() }
             return
         }
         guard let c = cikti, c.durdu || Date().timeIntervalSince(c.sonSes) > 15 else { if sorun.hasPrefix("Ses") || sorun.hasPrefix("Kayıt") { sorun = "" }; return }
@@ -300,12 +300,12 @@ final class Kayit {
 
     private func akisBaslat() async throws {
         var icerik = try await paylasilan(false, onScreenWindowsOnly: false)
-        if icerik.displays.isEmpty {                                        // ekran uykuda: uyandırıp bir kez daha bak
+        if ekranlar(icerik).isEmpty {                                        // ekran uykuda: uyandırıp bir kez daha bak
             ekranUyandir(); try? await Task.sleep(nanoseconds: 2_500_000_000)
             icerik = try await paylasilan(false, onScreenWindowsOnly: false)
-            if !icerik.displays.isEmpty { log("Ekran uykudaydı; uyandırıldı") }
+            if !ekranlar(icerik).isEmpty { log("Ekran uykudaydı; uyandırıldı") }
         }
-        guard let ekran = icerik.displays.first else { try mikrofonYedegi(); return }
+        guard let ekran = ekranlar(icerik).first else { try mikrofonYedegi(); return }
         yalnizMik = false
         pencereBasligi(icerik)
         // Yalnızca toplantı uygulamasının sesi: başka sekme/uygulamadaki video karışmaz (Chrome yardımcı süreci → ana uygulama)
@@ -424,6 +424,22 @@ final class Kayit {
 // ----------------------------------------------------------------------------- siteye bildir
 /// Uyuyan ekranı uyandırır (kullanıcı etkinliği bildirir; caffeinate -u). Ekran uykudayken ScreenCaptureKit ekran bulamıyor.
 /// Kayıt başlatılamayınca nedeni siteye (kayitlar/.kayit_hata.json): site size "kayıt başlatılamadı" bildirimi gönderir (2026-10-30).
+/// Deneme için ekran yokmuş gibi davranma (--kaydet ... --ekransiz N): mikrofon yedeği ve ekran dönünce tam kayda geçiş gerçek sesle sınanır.
+var sahteEkransiz: Date? = nil
+var ekranBakAraligi = 30.0
+func ekranlar(_ ic: SCShareableContent) -> [SCDisplay] { if let t = sahteEkransiz, Date() < t { return [] }; return ic.displays }
+
+/// İzinler (kayitlar/.kaydedici_izin.json): Ekran Kaydı ve Mikrofon izni düşmüşse site bunu toplantı başlamadan görür ve söyler (2026-10-30).
+func izinDurumu() -> [String: Any] {
+    let mik: String
+    switch AVCaptureDevice.authorizationStatus(for: .audio) { case .authorized: mik = "var"; case .notDetermined: mik = "sorulmadi"; default: mik = "yok" }
+    return ["ekran": CGPreflightScreenCaptureAccess(), "mikrofon": mik, "zaman": Date().timeIntervalSince1970]
+}
+func izinYaz(_ k: URL) {
+    let d = izinDurumu()
+    if let v = try? JSONSerialization.data(withJSONObject: d) { try? v.write(to: k.appendingPathComponent(".kaydedici_izin.json")) }
+}
+
 func kayitHatasiYaz(_ k: URL, _ hata: String?) {
     let u = k.appendingPathComponent(".kayit_hata.json")
     guard let h = hata else { try? FileManager.default.removeItem(at: u); return }
@@ -599,8 +615,13 @@ final class Gosterge: NSObject {
         let m = tur == "mentor" ? (k["yap"] as? String ?? k["gozlem"] as? String ?? "") : tur == "oneri" ? (k["soyle"] as? String ?? "") : (k["metin"] as? String ?? "")
         return m.isEmpty ? nil : (m, k["zaman"] as? Double ?? 0)
     }
-    func guncelle(_ kayit: Kayit?, kok: URL) {
+    func guncelle(_ kayit: Kayit?, kok: URL, yuzen: Bool = true) {
         var baslik: NSAttributedString? = nil; var durum = ""; var kart: String? = nil
+        if let k = kayit, yuzen {
+            let sn = Int(Date().timeIntervalSince(k.baslangic))
+            let sure = sn >= 3600 ? String(format: "%d:%02d:%02d", sn / 3600, (sn / 60) % 60, sn % 60) : String(format: "%d:%02d", sn / 60, sn % 60)
+            YuzenGosterge.shared.goster(k.sorun.isEmpty ? "\(sure)  Kaydediliyor" : "\(sure)  \(k.sorun)", sorun: !k.sorun.isEmpty)
+        } else { YuzenGosterge.shared.gizle() }
         if let k = kayit {
             let sn = Int(Date().timeIntervalSince(k.baslangic))
             let sure = sn >= 3600 ? String(format: "%d:%02d:%02d", sn / 3600, (sn / 60) % 60, sn % 60) : String(format: "%d:%02d", sn / 60, sn % 60)
@@ -628,6 +649,58 @@ final class Gosterge: NSObject {
             self.durumOge.title = durum
             self.kartOge.title = kart ?? ""; self.kartOge.isHidden = kart == nil
         }
+    }
+}
+
+// ----------------------------------------------------------------------------- yüzen kayıt göstergesi (2026-10-30)
+// Menü çubuğu öğesi çentikli Mac'te sağ taraf doluyken macOS tarafından gizleniyor (öğe oluşuyor, "görünür" sayılmıyor; bu Mac'te öyle).
+// "Toplantı kaydediliyor mu?" sorusu hiç akla gelmesin diye kayıt sürerken ekranın sağ üstünde, her uygulamanın ve tam ekranın üstünde
+// küçük bir hap durur: kırmızı nokta + süre (+ sorun varsa turuncu uyarı). Sürüklenebilir; tıklayınca Meet açılır. Ayar `kayit_gostergesi` (varsayılan açık).
+final class YuzenGosterge: NSObject {
+    static let shared = YuzenGosterge()
+    var panel: NSPanel?
+    let etiket = NSTextField(labelWithString: "")
+    let nokta = NSView()
+    var sorunda = false
+    private func kur() {
+        let p = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 120, height: 30), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+        p.level = .statusBar; p.isOpaque = false; p.backgroundColor = .clear; p.hasShadow = true; p.hidesOnDeactivate = false
+        p.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
+        p.isMovableByWindowBackground = true; p.ignoresMouseEvents = false
+        let v = TiklanirGorunum(); v.wantsLayer = true
+        v.layer?.backgroundColor = NSColor(calibratedWhite: 0.07, alpha: 0.86).cgColor; v.layer?.cornerRadius = 15; v.layer?.borderWidth = 1
+        v.layer?.borderColor = NSColor(calibratedWhite: 1, alpha: 0.12).cgColor
+        nokta.wantsLayer = true; nokta.layer?.cornerRadius = 4; nokta.layer?.backgroundColor = NSColor.systemRed.cgColor
+        nokta.frame = NSRect(x: 12, y: 11, width: 8, height: 8)
+        etiket.font = NSFont.monospacedDigitSystemFont(ofSize: 12.5, weight: .semibold); etiket.textColor = .white
+        etiket.frame = NSRect(x: 27, y: 6, width: 300, height: 18); etiket.lineBreakMode = .byClipping
+        v.addSubview(nokta); v.addSubview(etiket); p.contentView = v
+        let a = CABasicAnimation(keyPath: "opacity"); a.fromValue = 1; a.toValue = 0.25; a.duration = 0.9; a.autoreverses = true; a.repeatCount = .infinity
+        nokta.layer?.add(a, forKey: "nabiz")
+        panel = p
+    }
+    func goster(_ metin: String, sorun: Bool) {
+        DispatchQueue.main.async {
+            if self.panel == nil { self.kur() }
+            guard let p = self.panel else { return }
+            self.etiket.stringValue = metin
+            if sorun != self.sorunda { self.sorunda = sorun; self.nokta.layer?.backgroundColor = (sorun ? NSColor.systemOrange : NSColor.systemRed).cgColor }
+            let gen = min(360, max(100, self.etiket.attributedStringValue.size().width + 40))
+            let onceki = p.frame
+            if !p.isVisible, let e = NSScreen.main {                                // ilk gösterim: sağ üst, menü çubuğunun hemen altı
+                p.setFrame(NSRect(x: e.visibleFrame.maxX - gen - 14, y: e.visibleFrame.maxY - 30 - 10, width: gen, height: 30), display: true)
+                p.orderFrontRegardless()
+            } else if abs(onceki.width - gen) > 2 {
+                p.setFrame(NSRect(x: onceki.maxX - gen, y: onceki.minY, width: gen, height: 30), display: true)
+            }
+            self.etiket.frame.size.width = gen - 36
+        }
+    }
+    func gizle() { DispatchQueue.main.async { self.panel?.orderOut(nil) } }
+}
+final class TiklanirGorunum: NSView {
+    override func mouseUp(with event: NSEvent) {
+        if event.clickCount == 1, let u = URL(string: "http://127.0.0.1:8766/") { NSWorkspace.shared.open(u) }
     }
 }
 
@@ -690,8 +763,13 @@ if args.count >= 4 && args[1] == "--kaydet" {
     Task {
         k.hedef = hedef
         do {
-            try await k.baslat(); log("Kayıt başladı (\(Int(sn)) sn)")
-            if args.contains("--kopuk") {                              // deneme: yarıda akış kopmuş gibi yeniden bağlan
+            if let i = args.firstIndex(of: "--ekransiz"), i + 1 < args.count, let e = Double(args[i + 1]) { sahteEkransiz = Date().addingTimeInterval(e); ekranBakAraligi = 3 }
+            Gosterge.shared.kur()
+            try await k.baslat(); log("Kayıt başladı (\(Int(sn)) sn)"); Gosterge.shared.guncelle(k, kok: k.klasor)
+            if sahteEkransiz != nil {                                      // deneme: ilk N sn ekran yokmuş gibi; sonra tam kayda geçiş (menü çubuğu göstergesi de görünür)
+                let bas = Date()
+                while Date().timeIntervalSince(bas) < sn { try await Task.sleep(nanoseconds: 1_000_000_000); await k.gerekirseYenidenBaglan(); k.durumYaz(kayit: true); Gosterge.shared.guncelle(k, kok: k.klasor) }
+            } else if args.contains("--kopuk") {                              // deneme: yarıda akış kopmuş gibi yeniden bağlan
                 try await Task.sleep(nanoseconds: UInt64(sn * 500_000_000)); k.cikti?.durdu = true
                 await k.gerekirseYenidenBaglan(); k.durumYaz(kayit: true)
                 try await Task.sleep(nanoseconds: UInt64(sn * 500_000_000))
@@ -701,12 +779,15 @@ if args.count >= 4 && args[1] == "--kaydet" {
         let u = await k.durdur(hedef: hedef, enAzSn: 0)
         log(u == nil ? "Kayıt oluşmadı" : "Bitti: \(u!.path)"); exit(u == nil ? 3 : 0)
     }
-    RunLoop.main.run()
+    let uyg = NSApplication.shared; uyg.setActivationPolicy(.accessory); uyg.run()
 }
 if args.count >= 4 && args[1] == "--izle" {
     let ayarYolu = args[2]; let kayitKlasoru = URL(fileURLWithPath: args[3], isDirectory: true)
     try? FileManager.default.createDirectory(at: kayitKlasoru, withIntermediateDirectories: true)
     log("İzleme başladı. Toplantı uygulaması mikrofonu açınca kayıt başlar.")
+    let izin = izinDurumu(); izinYaz(kayitKlasoru)
+    log("İzinler: ekran kaydı \((izin["ekran"] as? Bool) == true ? "var" : "YOK"), mikrofon \(izin["mikrofon"] as? String ?? "?")")
+    var sonIzinYazma = Date()
     // Yarım kalmış kayıt (2026-10-28): kaydedici kayıt sürerken kapandıysa (çökme, yeniden başlatma) ham parçalar .kayit_N_*.m4a olarak kalır ve
     // sonraki kayıt aynı adlara YAZIP siliyordu (27 Ekim akşamı 37 dakikalık bir kayıt böyle kayboldu). Açılışta önce onlar dosyaya çevrilip siteye verilir.
     if let veri = try? Data(contentsOf: kayitKlasoru.appendingPathComponent(".kayit_canli.json")),
@@ -750,6 +831,7 @@ if args.count >= 4 && args[1] == "--izle" {
     Task {
         while true {
             nabizAt(klasor: kayitKlasoru)
+            if Date().timeIntervalSince(sonIzinYazma) >= 300 { sonIzinYazma = Date(); izinYaz(kayitKlasoru) }
             let ay = ayarOku(ayarYolu)
             let acik = (ay["oto_kayit"] as? Bool) ?? true
             Bildirici.shared.tara(kayitKlasoru)
@@ -832,7 +914,7 @@ if args.count >= 4 && args[1] == "--izle" {
                     catch { log("Kayıt başlatılamadı: \(error.localizedDescription) (izinleri kontrol edin)"); ilkGorulme = Date().addingTimeInterval(30); kayitHatasiYaz(kayitKlasoru, error.localizedDescription) }
                 }
             } else { ilkGorulme = nil }
-            Gosterge.shared.guncelle(aktif, kok: kayitKlasoru)
+            Gosterge.shared.guncelle(aktif, kok: kayitKlasoru, yuzen: (ay["kayit_gostergesi"] as? Bool) ?? true)
             try? await Task.sleep(nanoseconds: 3_000_000_000)
         }
     }

@@ -96,3 +96,50 @@ def _kayit_bekci_dongu():
 
 
 threading.Thread(target=_kayit_bekci_dongu, daemon=True).start()
+
+
+def kayit_sagligi():
+    """Tek bakışta: toplantıya girince kayıt başlar mı? (Meet ana sayfasındaki durum hapı ve sağlık denetimi.)
+    durum: kayit (sürüyor) | hazir | sorun; sorunlar [{kod, metin, cozum}]."""
+    simdi = time.time(); ay = ayarlar_oku(); sorunlar = []; v = {}
+    nabiz = KAYIT / ".kaydedici_nabiz"
+    try:
+        nabiz_yas = simdi - nabiz.stat().st_mtime
+    except OSError:
+        nabiz_yas = None
+    v["nabiz_yas"] = None if nabiz_yas is None else int(nabiz_yas)
+    try:
+        izin = json.loads((KAYIT / ".kaydedici_izin.json").read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        izin = {}
+    v["izin"] = {"ekran": izin.get("ekran"), "mikrofon": izin.get("mikrofon")}
+    if not ay.get("oto_kayit", True):
+        sorunlar.append({"kod": "oto_kayit", "metin": "Otomatik kayıt kapalı", "cozum": "Ayarlar → Kayıt → Otomatik toplantı kaydı"})
+    if nabiz_yas is None or nabiz_yas > 180:
+        sorunlar.append({"kod": "kaydedici", "metin": "Kayıt yardımcısı yanıt vermiyor" if nabiz_yas is not None else "Kayıt yardımcısı hiç çalışmamış",
+                         "cozum": "Birkaç saniye içinde kendiliğinden yeniden başlatılır; olmazsa Mac’i yeniden başlatın"})
+    if izin and izin.get("ekran") is False:
+        sorunlar.append({"kod": "izin_ekran", "metin": "Ekran ve Sistem Sesi Kaydı izni yok; karşı tarafın sesi alınamaz",
+                         "cozum": "Sistem Ayarları → Gizlilik ve Güvenlik → Ekran ve Sistem Sesi Kaydı → Transkript Kaydedici"})
+    if izin and izin.get("mikrofon") == "yok":
+        sorunlar.append({"kod": "izin_mik", "metin": "Mikrofon izni yok; sizin sesiniz alınamaz", "cozum": "Sistem Ayarları → Gizlilik ve Güvenlik → Mikrofon → Transkript Kaydedici"})
+    try:
+        h = json.loads((KAYIT / ".kayit_hata.json").read_text(encoding="utf-8"))
+        if simdi - float(h.get("zaman") or 0) < 600:
+            sorunlar.append({"kod": "hata", "metin": f"Son kayıt denemesi başarısız: {h.get('hata')}", "cozum": "İzinleri kontrol edin"})
+    except Exception:  # noqa: BLE001
+        pass
+    k = meet_kayit_canli()
+    if k:
+        v["kayit"] = {"ad": k.get("ad"), "sure": int(simdi - float(k.get("baslangic") or simdi)), "sorun": k.get("sorun") or "", "ses_yas": int(simdi - float(k.get("son_ses") or simdi))}
+    u = dict(uzanti_durum); u_yas = simdi - float(u.get("zaman") or 0)
+    v["uzanti"] = {"surum": u.get("surum"), "aktif": u_yas < 30, "arama": bool(u.get("arama")) and u_yas < 30, "baslik": u.get("baslik") if u_yas < 30 else ""}
+    v["sorunlar"] = sorunlar
+    v["durum"] = "kayit" if k else ("sorun" if sorunlar else "hazir")
+    v["kontrol"] = int(min(x for x in [nabiz_yas if nabiz_yas is not None else 10**6, 15] )) if nabiz_yas is not None else None
+    return v
+
+
+@app.get("/api/meet/kayit-saglik")
+def meet_kayit_saglik_get():
+    return jsonify(kayit_sagligi())
